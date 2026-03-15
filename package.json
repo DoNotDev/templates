@@ -1,0 +1,90 @@
+{
+  "name": "@donotdev/templates",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "description": "Page templates for common use cases in DoNotDev",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/donotdev/templates.git"
+  },
+  "keywords": [
+    "donotdev",
+    "dndev",
+    "react",
+    "templates",
+    "pages",
+    "layouts",
+    "marketing",
+    "typescript"
+  ],
+  "scripts": {
+    "dev": "tsc --noEmit --watch --listFiles false --listEmittedFiles false",
+    "clean": "rimraf tsconfig.tsbuildinfo",
+    "type-check": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@donotdev/components": "^0.1.0",
+    "@donotdev/core": "^0.1.0",
+    "@donotdev/ui": "^0.1.0",
+    "@hookform/resolvers": "^5.2.2",
+    "html-react-parser": "^5.2.17",
+    "marked": "^17.0.3",
+    "react-hook-form": "^7.71.2"
+  },
+  "peerDependencies": {
+    "@donotdev/auth": "^0.1.0",
+    "@donotdev/billing": "^0.1.0",
+    "@donotdev/crud": "^0.1.0",
+    "@donotdev/oauth": "^0.1.0",
+    "lucide-react": "^0.575.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "valibot": "^1.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@donotdev/auth": {
+      "optional": true
+    },
+    "@donotdev/billing": {
+      "optional": true
+    },
+    "@donotdev/crud": {
+      "optional": true
+    },
+    "@donotdev/oauth": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@donotdev/auth": "workspace:*",
+    "@donotdev/billing": "workspace:*",
+    "@donotdev/crud": "workspace:*",
+    "@donotdev/oauth": "workspace:*",
+    "lucide-react": "^0.575.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "valibot": "^1.2.0"
+  }
+}

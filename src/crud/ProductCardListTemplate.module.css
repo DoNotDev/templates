@@ -1,0 +1,42 @@
+/* packages/templates/src/crud/ProductCardListTemplate.module.css */
+
+.productCard {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.productCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.productCardImage {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--muted);
+}
+.productCardImage img {
+  transition: transform 0.3s ease;
+}
+.productCard:hover .productCardImage img {
+  transform: scale(1.05);
+}
+.productPrice {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+}
+.productSpecs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+}
+.productSpecPill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  padding: var(--gap-xs) var(--gap-sm);
+  background: var(--muted);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+}
