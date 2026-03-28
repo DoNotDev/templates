@@ -1,6 +1,6 @@
 {
   "name": "@donotdev/templates",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "private": false,
   "license": "MIT",
@@ -17,6 +17,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "guidelines",
     "package.json",
     "README.md",
     "LICENSE.md"
@@ -45,19 +46,19 @@
     "type-check": "bunx tsc --noEmit"
   },
   "dependencies": {
-    "@donotdev/components": "^0.1.0",
-    "@donotdev/core": "^0.1.0",
-    "@donotdev/ui": "^0.1.0",
+    "@donotdev/components": "^0.1.1",
+    "@donotdev/core": "^0.1.1",
+    "@donotdev/ui": "^0.1.1",
     "@hookform/resolvers": "^5.2.2",
     "html-react-parser": "^5.2.17",
     "marked": "^17.0.3",
     "react-hook-form": "^7.71.2"
   },
   "peerDependencies": {
-    "@donotdev/auth": "^0.1.0",
-    "@donotdev/billing": "^0.1.0",
-    "@donotdev/crud": "^0.1.0",
-    "@donotdev/oauth": "^0.1.0",
+    "@donotdev/auth": "^0.1.1",
+    "@donotdev/billing": "^0.1.1",
+    "@donotdev/crud": "^0.1.1",
+    "@donotdev/oauth": "^0.1.1",
     "lucide-react": "^0.575.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

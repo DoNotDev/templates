@@ -39,6 +39,7 @@ import { InquiryFormTemplate } from './InquiryFormTemplate';
 
 import type { ReactElement } from 'react';
 
+/** Props for the CarDetailTemplate component. */
 export interface CarDetailTemplateProps {
   /** Vehicle entity definition */
   entity: Entity;

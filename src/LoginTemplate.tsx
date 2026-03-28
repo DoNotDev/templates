@@ -15,6 +15,7 @@ import { useAuthVisibility } from '@donotdev/ui';
 
 import type { FC } from 'react';
 
+/** Props for the LoginTemplate component. */
 export interface LoginTemplateProps {
   title?: string;
   subtitle?: string;

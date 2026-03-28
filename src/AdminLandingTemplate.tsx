@@ -31,11 +31,13 @@ import {
   PageContainer,
   useNavigate,
   useRedirectGuard,
+  useAuthSafe,
   Link,
 } from '@donotdev/ui';
 
 import type { ReactNode } from 'react';
 
+/** Props for the AdminLandingTemplate component. */
 export interface AdminLandingTemplateProps {
   /** Page title (e.g., "Admin Login") */
 
@@ -123,6 +125,8 @@ export function AdminLandingTemplate({
 
   const appConfig = useAppConfig('app');
 
+  const user = useAuthSafe('user');
+
   const { shouldRedirect, redirectTo, isChecking } = useRedirectGuard({
     condition: redirectConfig?.condition,
 
@@ -166,8 +170,20 @@ export function AdminLandingTemplate({
         </Section>
       )}
 
-      {isAuthModuleAvailable && MultipleAuthProviders && (
-        <MultipleAuthProviders />
+      {isAuthModuleAvailable && MultipleAuthProviders && !user && (
+        <Section contentWidth="narrow">
+          <MultipleAuthProviders />
+        </Section>
+      )}
+
+      {user && !shouldRedirect && (
+        <Section contentWidth="narrow">
+          <Stack align="center">
+            <Text as="p" level="body" variant="muted">
+              {t('adminLanding.signedInAs', `Signed in as ${user.email || user.displayName || user.id}`)}
+            </Text>
+          </Stack>
+        </Section>
       )}
 
       {children}

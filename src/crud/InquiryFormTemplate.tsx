@@ -31,6 +31,7 @@ import {
 
 import type { ReactElement, FormEvent } from 'react';
 
+/** Props for the InquiryFormTemplate component. */
 export interface InquiryFormTemplateProps {
   /** Customer entity definition */
   customerEntity: Entity;

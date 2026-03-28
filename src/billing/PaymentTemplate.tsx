@@ -28,6 +28,7 @@ import {
 
 import { ProductCard, SecurityNotice } from './billingImports';
 
+/** Props for the PaymentTemplate component. */
 export interface PaymentTemplateProps {
   namespace: string;
   billing: StripeFrontConfig;

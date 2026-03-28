@@ -49,6 +49,7 @@ import { useNavigate } from '@donotdev/ui';
 
 import type { ReactElement } from 'react';
 
+/** Props for the CarCardListTemplate component. */
 export interface CarCardListTemplateProps extends Omit<
   EntityCardListProps,
   'cols'

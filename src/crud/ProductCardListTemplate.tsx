@@ -50,6 +50,7 @@ import {
 } from './crudImports';
 import { useNavigate } from '@donotdev/ui';
 
+/** Props for the ProductCardListTemplate component. */
 export interface ProductCardListTemplateProps extends Omit<
   EntityCardListProps,
   'cols'

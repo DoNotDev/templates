@@ -49,6 +49,7 @@ import { Link } from '@donotdev/ui';
 
 import type { ReactElement } from 'react';
 
+/** Props for the InquiryAdminTemplate component. */
 export interface InquiryAdminTemplateProps {
   /** Customer entity definition (linked via customerId) */
   customerEntity: Entity;

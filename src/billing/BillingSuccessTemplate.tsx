@@ -35,6 +35,7 @@ import {
   FeatureDisabled,
 } from '@donotdev/ui';
 
+/** Props for the BillingSuccessTemplate component. */
 export interface BillingSuccessTemplateProps {
   namespace: string;
   title?: string;

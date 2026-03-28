@@ -25,6 +25,7 @@ import { useBillingVisibility, FeatureDisabled } from '@donotdev/ui';
 
 import type { ReactNode } from 'react';
 
+/** Props for the CheckoutPageTemplate component. */
 export interface CheckoutPageTemplateProps {
   children?: ReactNode;
   priceId?: string;

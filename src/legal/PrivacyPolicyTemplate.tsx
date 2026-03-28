@@ -13,7 +13,7 @@
 import { List, Section, Stack } from '@donotdev/components';
 import { useTranslation, formatDate } from '@donotdev/core';
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 /**
  * Privacy Policy Template Configuration
@@ -45,6 +45,8 @@ export interface PrivacyPolicyConfig {
   };
   /** Section tone for background @default 'base' */
   tone?: 'ghost' | 'base' | 'muted' | 'contrast' | 'accent';
+  /** Additional sections rendered after the standard sections */
+  extraSections?: ReactNode;
 }
 
 /**
@@ -78,6 +80,7 @@ export const PrivacyPolicyTemplate: ComponentType<PrivacyPolicyConfig> = ({
   },
   contactInfo = {},
   tone = 'base',
+  extraSections,
 }) => {
   const { t, i18n } = useTranslation('privacy');
   const formattedDate = formatDate(lastUpdated, i18n?.language || 'en');
@@ -940,6 +943,8 @@ export const PrivacyPolicyTemplate: ComponentType<PrivacyPolicyConfig> = ({
             </p>
           </section>
         )}
+
+        {extraSections}
       </Stack>
 
       <div

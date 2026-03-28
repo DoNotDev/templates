@@ -13,7 +13,7 @@
 import { Section, Stack } from '@donotdev/components';
 import { useTranslation, formatDate } from '@donotdev/core';
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 /**
  * Terms of Service Template Configuration
@@ -49,6 +49,8 @@ export interface TermsOfServiceConfig {
   arbitrationLocation?: string;
   /** Section tone for background @default 'base' */
   tone?: 'ghost' | 'base' | 'muted' | 'contrast' | 'accent';
+  /** Additional sections rendered after the standard 15 sections */
+  extraSections?: ReactNode;
 }
 
 /**
@@ -84,6 +86,7 @@ export const TermsOfServiceTemplate: ComponentType<TermsOfServiceConfig> = ({
   arbitrationOrg = 'American Arbitration Association',
   arbitrationLocation = 'New York, NY',
   tone = 'base',
+  extraSections,
 }) => {
   const { t, i18n } = useTranslation('terms');
   const formattedDate = formatDate(lastUpdated, i18n?.language || 'en');
@@ -972,6 +975,8 @@ export const TermsOfServiceTemplate: ComponentType<TermsOfServiceConfig> = ({
             )}
           </div>
         </section>
+
+        {extraSections}
       </Stack>
 
       <div

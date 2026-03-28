@@ -35,13 +35,17 @@ import { Link } from '@donotdev/ui';
 import type { DOMNode } from 'html-react-parser';
 import type { ComponentType } from 'react';
 
+/**
+ * @security Regex-based sanitization for author-controlled content only.
+ * For untrusted user content, use DOMPurify or equivalent server-side sanitization.
+ */
 // ── Lightweight HTML sanitizer (no DOMPurify dependency) ──
 // Strips known XSS vectors from marked-generated HTML before parsing.
 // Run iteratively to catch nested/reconstructed tags (e.g., <scr<script>ipt>).
 const DANGEROUS_TAGS_RE =
-  /<\/?(?:script|iframe|object|embed|form|base|meta|link|style|applet)[\s>\/][^]*?(?:<\/(?:script|iframe|object|embed|form|base|meta|link|style|applet)>|\/?>)/gi;
+  /<\/?(?:script|iframe|object|embed|form|base|meta|link|style|applet|svg|math)[\s>\/][^]*?(?:<\/(?:script|iframe|object|embed|form|base|meta|link|style|applet|svg|math)>|\/?>)/gi;
 const DANGEROUS_SELF_CLOSING_RE =
-  /<(?:script|iframe|object|embed|form|base|meta|link|applet)\s*\/?\s*>/gi;
+  /<(?:script|iframe|object|embed|form|base|meta|link|applet|svg|math)\s*\/?\s*>/gi;
 const EVENT_HANDLER_RE = /\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
 const DANGEROUS_URI_RE =
   /\s+(?:href|src|xlink:href|action|formaction)\s*=\s*(?:"[^"]*"|'[^']*')/gi;
@@ -79,6 +83,7 @@ function sanitizeHtml(html: string): string {
   return result;
 }
 
+/** Props for the MarkdownViewer component. */
 export interface MarkdownViewerProps {
   /** Raw markdown content */
   content?: string;
