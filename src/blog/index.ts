@@ -15,7 +15,8 @@
  * `src/content/blog/slug_lang.md` (e.g. `my-post_en.md`, `my-post_fr.md`)
  *
  * ## Exports
- * - `createBlogLoader` — Core loader function
+ * - `getBlogLoader` — Zero-arg loader using virtual:donotdev/blog
+ * - `createBlogLoader` — Core loader function (manual control)
  * - `parseFrontmatter` — Frontmatter parser
  * - `BlogList` — Post listing component
  * - `BlogPostView` — Single post component

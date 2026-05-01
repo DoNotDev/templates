@@ -48,7 +48,7 @@ import {
   formatValue,
   useCrudFilters,
 } from './crudImports';
-import { useNavigate } from '@donotdev/ui';
+import { Link } from '@donotdev/ui';
 
 /** Props for the ProductCardListTemplate component. */
 export interface ProductCardListTemplateProps extends Omit<
@@ -147,7 +147,6 @@ export function ProductCardListTemplate({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   if (!isCrudModuleAvailable) return null;
 
-  const navigate = useNavigate();
   const base = basePath ?? `/${entity.collection}`;
   // Entity + crud so formatValue and crud keys use t('crud:key')
   const { t, i18n } = useTranslation([entity.namespace, 'crud']);
@@ -214,7 +213,11 @@ export function ProductCardListTemplate({
   }, [specsFields, entity.fields, resolvedPriceField, resolvedBadgeField]);
 
   // Data fetching
-  const { data: listData, loading } = useCrudCardList(entity, { staleTime });
+  const {
+    data: listData,
+    loading,
+    error: fetchError,
+  } = useCrudCardList(entity, { staleTime });
   const rawData = listData?.items || [];
 
   // Favorites - always enabled, no props needed
@@ -272,18 +275,6 @@ export function ProductCardListTemplate({
         return fieldConfig?.type === 'image' || fieldConfig?.type === 'images';
       });
   }, [entity.listCardFields, entity.listFields, entity.fields]);
-
-  // Card click: onClick(id) if provided, else navigate to basePath/:id
-  const handleView = useCallback(
-    (id: string) => {
-      if (onClick) {
-        onClick(id);
-      } else {
-        navigate(`${base}/${id}`);
-      }
-    },
-    [base, navigate, onClick]
-  );
 
   const pageTitle = title || t('name', { defaultValue: entity.name });
   const pageDescription = description || t('description', { defaultValue: '' });
@@ -372,6 +363,23 @@ export function ProductCardListTemplate({
               />
             ))}
           </Grid>
+        ) : fetchError ? (
+          <Stack
+            align="center"
+            justify="center"
+            style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+          >
+            <Text level="h3" style={{ color: 'var(--destructive)' }}>
+              {t('crud:errors.fetchFailed', {
+                defaultValue: `Failed to load ${entity.name.toLowerCase()}`,
+              })}
+            </Text>
+            <Text level="small" style={{ color: 'var(--destructive)' }}>
+              {fetchError instanceof Error
+                ? fetchError.message
+                : String(fetchError)}
+            </Text>
+          </Stack>
         ) : data.length === 0 ? (
           <Stack
             align="center"
@@ -426,23 +434,166 @@ export function ProductCardListTemplate({
 
               const itemIsFavorite = isFavorite(item.id as string);
 
+              const cardBody = (
+                <Stack direction="column">
+                  {/* Image with badge overlay */}
+                  {imageUrl && (
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        aspectRatio: imageAspectRatio,
+                        overflow: 'hidden',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'var(--muted)',
+                      }}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={itemTitle}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                      {/* Badge overlay - Top Right */}
+                      {badgeValue && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 'var(--gap-sm)',
+                            insetInlineEnd: 'var(--gap-sm)',
+                          }}
+                        >
+                          <Badge variant={getBadgeVariant(badgeValue)}>
+                            {translateFieldLabel(
+                              String(badgeValue),
+                              entity.fields[resolvedBadgeField!],
+                              t
+                            )}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  <Stack direction="column" gap="tight">
+                    {/* Title & Subtitle */}
+                    <div>
+                      <Text level="h4" style={{ margin: 0 }}>
+                        {itemTitle}
+                      </Text>
+                      {subtitle && (
+                        <Text
+                          level="small"
+                          variant="muted"
+                          style={{ marginTop: 'var(--gap-xs)' }}
+                        >
+                          {subtitle}
+                        </Text>
+                      )}
+                    </div>
+
+                    {/* Price */}
+                    {priceValue != null && priceFieldConfig && (
+                      <div
+                        style={{
+                          fontSize: 'var(--font-size-2xl)',
+                          fontWeight: 700,
+                          color: 'var(--primary)',
+                        }}
+                      >
+                        {(() => {
+                          const priceDisplay = formatValue(
+                            priceValue,
+                            priceFieldConfig,
+                            t,
+                            { compact: true }
+                          );
+                          return typeof priceDisplay === 'string'
+                            ? priceDisplay
+                            : priceDisplay;
+                        })()}
+                      </div>
+                    )}
+
+                    {/* Spec pills */}
+                    {resolvedSpecsFields.length > 0 && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 'var(--gap-xs)',
+                        }}
+                      >
+                        {resolvedSpecsFields.map((fieldName) => {
+                          const value = item[fieldName];
+                          if (value === undefined || value === null)
+                            return null;
+                          const fieldConfig = entity.fields[fieldName];
+                          const label = translateFieldLabel(
+                            fieldName,
+                            fieldConfig,
+                            t
+                          );
+
+                          // Format value using single source of truth
+                          const displayValue = fieldConfig
+                            ? formatValue(value, fieldConfig, t, {
+                                compact: true,
+                              })
+                            : String(value);
+
+                          return (
+                            <span
+                              key={fieldName}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 'var(--gap-xs)',
+                                padding: 'var(--gap-xs) var(--gap-sm)',
+                                background: 'var(--muted)',
+                                borderRadius: 'var(--radius-full)',
+                                fontSize: 'var(--font-size-sm)',
+                                color: 'var(--muted-foreground)',
+                              }}
+                            >
+                              {label}: {displayValue}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </Stack>
+                </Stack>
+              );
+
+              const cardStyle = {
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              };
+
               return (
-                <Card
-                  key={item.id as string}
-                  clickable
-                  onClick={() => handleView(item.id as string)}
-                  elevated
-                  style={{
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                  }}
-                >
-                  {/* Heart Icon - positioned absolutely on card (Card has position: relative from CSS) */}
+                <div key={item.id as string} style={{ position: 'relative' }}>
+                  {onClick ? (
+                    <Card
+                      clickable
+                      onClick={() => onClick(item.id as string)}
+                      elevated
+                      style={cardStyle}
+                    >
+                      {cardBody}
+                    </Card>
+                  ) : (
+                    <Card asChild clickable elevated style={cardStyle}>
+                      <Link path={`${base}/${item.id}`}>{cardBody}</Link>
+                    </Card>
+                  )}
+                  {/* Heart Icon - sibling to Card to avoid invalid <button> inside <a> */}
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(item.id as string);
-                    }}
+                    onClick={() => toggleFavorite(item.id as string)}
                     style={{
                       position: 'absolute',
                       top: 'var(--gap-sm)',
@@ -486,141 +637,7 @@ export function ProductCardListTemplate({
                       }}
                     />
                   </button>
-
-                  <Stack direction="column">
-                    {/* Image with badge overlay */}
-                    {imageUrl && (
-                      <div
-                        style={{
-                          position: 'relative',
-                          width: '100%',
-                          aspectRatio: imageAspectRatio,
-                          overflow: 'hidden',
-                          borderRadius: 'var(--radius-md)',
-                          background: 'var(--muted)',
-                        }}
-                      >
-                        <img
-                          src={imageUrl}
-                          alt={itemTitle}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                          }}
-                        />
-                        {/* Badge overlay - Top Right */}
-                        {badgeValue && (
-                          <div
-                            style={{
-                              position: 'absolute',
-                              top: 'var(--gap-sm)',
-                              insetInlineEnd: 'var(--gap-sm)',
-                            }}
-                          >
-                            <Badge variant={getBadgeVariant(badgeValue)}>
-                              {translateFieldLabel(
-                                String(badgeValue),
-                                entity.fields[resolvedBadgeField!],
-                                t
-                              )}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Content */}
-                    <Stack direction="column" gap="tight">
-                      {/* Title & Subtitle */}
-                      <div>
-                        <Text level="h4" style={{ margin: 0 }}>
-                          {itemTitle}
-                        </Text>
-                        {subtitle && (
-                          <Text
-                            level="small"
-                            variant="muted"
-                            style={{ marginTop: 'var(--gap-xs)' }}
-                          >
-                            {subtitle}
-                          </Text>
-                        )}
-                      </div>
-
-                      {/* Price */}
-                      {priceValue != null && priceFieldConfig && (
-                        <div
-                          style={{
-                            fontSize: 'var(--font-size-2xl)',
-                            fontWeight: 700,
-                            color: 'var(--primary)',
-                          }}
-                        >
-                          {(() => {
-                            const priceDisplay = formatValue(
-                              priceValue,
-                              priceFieldConfig,
-                              t,
-                              { compact: true }
-                            );
-                            return typeof priceDisplay === 'string'
-                              ? priceDisplay
-                              : priceDisplay;
-                          })()}
-                        </div>
-                      )}
-
-                      {/* Spec pills */}
-                      {resolvedSpecsFields.length > 0 && (
-                        <div
-                          style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 'var(--gap-xs)',
-                          }}
-                        >
-                          {resolvedSpecsFields.map((fieldName) => {
-                            const value = item[fieldName];
-                            if (value === undefined || value === null)
-                              return null;
-                            const fieldConfig = entity.fields[fieldName];
-                            const label = translateFieldLabel(
-                              fieldName,
-                              fieldConfig,
-                              t
-                            );
-
-                            // Format value using single source of truth
-                            const displayValue = fieldConfig
-                              ? formatValue(value, fieldConfig, t, {
-                                  compact: true,
-                                })
-                              : String(value);
-
-                            return (
-                              <span
-                                key={fieldName}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: 'var(--gap-xs)',
-                                  padding: 'var(--gap-xs) var(--gap-sm)',
-                                  background: 'var(--muted)',
-                                  borderRadius: 'var(--radius-full)',
-                                  fontSize: 'var(--font-size-sm)',
-                                  color: 'var(--muted-foreground)',
-                                }}
-                              >
-                                {label}: {displayValue}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </Stack>
-                  </Stack>
-                </Card>
+                </div>
               );
             })}
           </Grid>

@@ -5,10 +5,10 @@
  * @fileoverview MarkdownViewer component
  * @description SSR-safe markdown rendering with framework components
  *
- * Uses marked for parsing, html-react-parser for SSR-compatible HTML→React.
+ * Uses marked + marked-footnote (GFM footnotes), html-react-parser for SSR-compatible HTML→React.
  * Intercepts:
  * - Code blocks → framework Code component (Shiki syntax highlighting)
- * - Links → framework Link (internal) or `<a>` (external)
+ * - Links → framework Link (internal / external) or native `<a>` (hash-only, e.g. footnotes)
  * - Images → native `<img>` with lazy loading and async decoding
  *
  * **Security: Author-controlled content only.**
@@ -25,8 +25,13 @@
  * @author AMBROISE PARK Consulting
  */
 
-import parse, { domToReact, Element } from 'html-react-parser';
+import parse, {
+  attributesToProps,
+  domToReact,
+  Element,
+} from 'html-react-parser';
 import { marked } from 'marked';
+import markedFootnote from 'marked-footnote';
 import { memo, useMemo } from 'react';
 
 import { Code, cn } from '@donotdev/components';
@@ -34,6 +39,8 @@ import { Link } from '@donotdev/ui';
 
 import type { DOMNode } from 'html-react-parser';
 import type { ComponentType } from 'react';
+
+marked.use(markedFootnote());
 
 /**
  * @security Regex-based sanitization for author-controlled content only.
@@ -106,7 +113,7 @@ function getText(el: Element): string {
  *
  * Intercepts:
  * - Code blocks → framework Code component (Shiki syntax highlighting)
- * - Links → framework Link (internal) or `<a>` (external)
+ * - Links → framework Link (internal / external) or native `<a>` (hash-only)
  * - Images → `<img>` with `loading="lazy"` and `decoding="async"`
  *
  * All other elements render as default HTML with CSS prose styling.
@@ -148,9 +155,16 @@ const MarkdownViewerBase: ComponentType<MarkdownViewerProps> = ({
           }
         }
 
-        // Links → framework Link (handles both internal and external)
+        // Links → framework Link (routes / external). Hash-only = native <a> (footnote refs; Link uses navigate()).
         if (name === 'a') {
           const href = attribs?.href || '';
+          if (href.startsWith('#')) {
+            return (
+              <a {...attributesToProps(attribs)}>
+                {domToReact(children as DOMNode[])}
+              </a>
+            );
+          }
           return <Link path={href}>{domToReact(children as DOMNode[])}</Link>;
         }
 

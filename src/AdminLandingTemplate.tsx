@@ -180,7 +180,10 @@ export function AdminLandingTemplate({
         <Section contentWidth="narrow">
           <Stack align="center">
             <Text as="p" level="body" variant="muted">
-              {t('adminLanding.signedInAs', `Signed in as ${user.email || user.displayName || user.id}`)}
+              {t(
+                'adminLanding.signedInAs',
+                `Signed in as ${user.email || user.displayName || user.id}`
+              )}
             </Text>
           </Stack>
         </Section>

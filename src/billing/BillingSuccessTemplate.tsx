@@ -29,7 +29,7 @@ import {
 import { useTranslation } from '@donotdev/core';
 import {
   PageContainer,
-  useNavigate,
+  Link,
   useAuthSafe,
   useBillingVisibility,
   FeatureDisabled,
@@ -69,7 +69,6 @@ export function BillingSuccessTemplate({
   const { shouldHide } = useBillingVisibility();
   const { t } = useTranslation([namespace, 'billing']);
   const userSubscription = useAuthSafe('userSubscription');
-  const navigate = useNavigate();
 
   if (shouldHide) {
     return (
@@ -345,7 +344,13 @@ export function BillingSuccessTemplate({
           className="dndev-text-center"
           style={{ marginTop: 'var(--gap-lg)' }}
         >
-          <Button onClick={() => navigate('/')}>
+          <Button
+            render={({ children, ...renderProps }) => (
+              <Link path="/" {...renderProps}>
+                {children}
+              </Link>
+            )}
+          >
             {t('billing:templates.success.goToDashboard', 'Go to Dashboard')}
           </Button>
         </div>

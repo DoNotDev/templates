@@ -1,6 +1,6 @@
 {
   "name": "@donotdev/templates",
-  "version": "0.1.1",
+  "version": "0.1.42",
   "type": "module",
   "private": false,
   "license": "MIT",
@@ -46,22 +46,23 @@
     "type-check": "bunx tsc --noEmit"
   },
   "dependencies": {
-    "@donotdev/components": "^0.1.1",
-    "@donotdev/core": "^0.1.1",
-    "@donotdev/ui": "^0.1.1",
-    "@hookform/resolvers": "^5.2.2",
+    "@donotdev/components": "^0.1.42",
+    "@donotdev/core": "^0.1.42",
+    "@donotdev/ui": "^0.1.42",
     "html-react-parser": "^5.2.17",
     "marked": "^17.0.3",
-    "react-hook-form": "^7.71.2"
+    "marked-footnote": "^1.4.0"
   },
   "peerDependencies": {
-    "@donotdev/auth": "^0.1.1",
-    "@donotdev/billing": "^0.1.1",
-    "@donotdev/crud": "^0.1.1",
-    "@donotdev/oauth": "^0.1.1",
+    "@donotdev/auth": "^0.1.42",
+    "@donotdev/billing": "^0.1.42",
+    "@donotdev/crud": "^0.1.42",
+    "@donotdev/oauth": "^0.1.42",
+    "@hookform/resolvers": "^5.2.2",
     "lucide-react": "^0.575.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-hook-form": "^7.71.2",
     "valibot": "^1.2.0"
   },
   "peerDependenciesMeta": {
@@ -83,9 +84,11 @@
     "@donotdev/billing": "workspace:*",
     "@donotdev/crud": "workspace:*",
     "@donotdev/oauth": "workspace:*",
+    "@hookform/resolvers": "^5.2.2",
     "lucide-react": "^0.575.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-hook-form": "^7.71.2",
     "valibot": "^1.2.0"
   }
 }

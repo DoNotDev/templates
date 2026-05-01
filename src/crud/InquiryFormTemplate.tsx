@@ -10,6 +10,13 @@
  * intentional — this is not production i18n code, it's a starting point
  * that demonstrates a public-facing CRUD form workflow.
  *
+ * **Typing:** Use `const` type parameters (`CE`, `IE`) so `customerEntity` /
+ * `inquiryEntity` keep their `defineEntity()` literal types — no widened
+ * `AnyEntity` at the call site. Default field names (`carId`, `message`,
+ * `gdprConsent`, default `customerFields`) assume the showcase entity shapes;
+ * pass explicit `contextField` / `messageField` / `consentField` / `customerFields`
+ * when your entities use different keys.
+ *
  * @see {@link https://donotdev.com/docs/templates} for customization guide
  *
  * @version 0.1.0
@@ -20,23 +27,29 @@
 import { useState } from 'react';
 
 import { Stack, Button, Card, Alert, Text } from '@donotdev/components';
-import { useTranslation } from '@donotdev/core';
-import type { Entity } from '@donotdev/core';
+import { useTranslation, generateUUID, createSchemas, useBreakpoint } from '@donotdev/core';
+import type { AnyEntity, BulkAcrossBatch } from '@donotdev/core';
+import type { InferEntityData } from '@donotdev/crud';
 import {
   isCrudModuleAvailable,
   useCrud,
   useEntityForm,
   FormFieldRenderer,
 } from './crudImports';
+import { asPartialEntityData } from './asPartialEntityData';
 
 import type { ReactElement, FormEvent } from 'react';
+import type { FieldPath } from 'react-hook-form';
 
 /** Props for the InquiryFormTemplate component. */
-export interface InquiryFormTemplateProps {
+export interface InquiryFormTemplateProps<
+  CE extends AnyEntity = AnyEntity,
+  IE extends AnyEntity = AnyEntity,
+> {
   /** Customer entity definition */
-  customerEntity: Entity;
+  customerEntity: CE;
   /** Inquiry entity definition */
-  inquiryEntity: Entity;
+  inquiryEntity: IE;
   /** Optional context ID (e.g., carId, productId) */
   contextId?: string;
   /** Optional context name for placeholder (e.g., "BMW X5 2024") */
@@ -45,14 +58,14 @@ export interface InquiryFormTemplateProps {
   contextDetails?: string;
   /** Message placeholder text (overrides entity placeholder if provided) */
   messagePlaceholder?: string;
-  /** Field name for context reference in inquiry (default: 'carId') */
-  contextField?: string;
-  /** Customer fields to display (default: ['firstName', 'lastName', 'email', 'phone']) */
-  customerFields?: string[];
-  /** Message field name in inquiry entity (default: 'message') */
-  messageField?: string;
-  /** GDPR consent field name in inquiry entity (default: 'gdprConsent') */
-  consentField?: string;
+  /** Field on the inquiry entity that holds the context reference (showcase default: `carId`) */
+  contextField?: keyof InferEntityData<IE>;
+  /** Customer fields to render (showcase default: name + contact) */
+  customerFields?: Array<keyof InferEntityData<CE>>;
+  /** Inquiry message field (showcase default: `message`) */
+  messageField?: keyof InferEntityData<IE>;
+  /** Customer GDPR consent field (showcase default: `gdprConsent`) */
+  consentField?: keyof InferEntityData<CE>;
   /** Callback after successful submission */
   onSuccess?: () => void;
   /** Callback on error */
@@ -75,26 +88,31 @@ export interface InquiryFormTemplateProps {
  * />
  * ```
  */
-export function InquiryFormTemplate({
+export function InquiryFormTemplate<
+  const CE extends AnyEntity,
+  const IE extends AnyEntity,
+>({
   customerEntity,
   inquiryEntity,
   contextId,
   contextName,
   contextDetails,
   messagePlaceholder,
-  contextField = 'carId',
-  customerFields = ['firstName', 'lastName', 'email', 'phone'],
-  messageField = 'message',
-  consentField = 'gdprConsent',
+  contextField = 'carId' as keyof InferEntityData<IE>,
+  customerFields = ['firstName', 'lastName', 'email', 'phone'] as Array<
+    keyof InferEntityData<CE>
+  >,
+  messageField = 'message' as keyof InferEntityData<IE>,
+  consentField = 'gdprConsent' as keyof InferEntityData<CE>,
   onSuccess,
   onError,
-}: InquiryFormTemplateProps): ReactElement | null {
+}: InquiryFormTemplateProps<CE, IE>): ReactElement | null {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
   // eslint-disable-next-line react-hooks/rules-of-hooks
   if (!isCrudModuleAvailable) return null;
 
-  const { add: addCustomer } = useCrud(customerEntity);
-  const { add: addInquiry } = useCrud(inquiryEntity);
+  const { bulkAcross } = useCrud(customerEntity);
+  const isMobile = useBreakpoint('isMobile');
 
   const { t: customerT } = useTranslation(
     `entity-${customerEntity.name.toLowerCase()}`
@@ -118,28 +136,32 @@ export function InquiryFormTemplate({
         )
       : '';
 
+  const inquiryDefaultValues = asPartialEntityData<IE>({
+    [contextField]: contextId || undefined,
+    date: new Date().toISOString(),
+    status: 'draft' as InferEntityData<IE>['status'],
+    [messageField]: defaultMessage,
+  });
+
   const inquiryForm = useEntityForm(inquiryEntity, {
     operation: 'create',
-    defaultValues: {
-      [contextField]: contextId || undefined,
-      date: new Date().toISOString(),
-      status: 'draft',
-      [messageField]: defaultMessage,
-    },
+    defaultValues: inquiryDefaultValues,
   });
 
   // Use messagePlaceholder prop if provided, otherwise use entity's placeholder
-  const messageFieldConfig = inquiryEntity.fields[messageField];
+  const messageFieldConfig = inquiryEntity.fields[messageField as string];
   const effectivePlaceholder =
     messagePlaceholder || messageFieldConfig?.options?.placeholder;
 
+  const customerDefaultValues = asPartialEntityData<CE>({
+    type: 'Prospect' as InferEntityData<CE>['type'],
+    status: 'draft' as InferEntityData<CE>['status'],
+    [consentField]: false as InferEntityData<CE>[typeof consentField],
+  });
+
   const customerForm = useEntityForm(customerEntity, {
     operation: 'create',
-    defaultValues: {
-      type: 'Prospect',
-      status: 'draft',
-      [consentField]: false,
-    },
+    defaultValues: customerDefaultValues,
   });
 
   const [status, setStatus] = useState<
@@ -147,36 +169,60 @@ export function InquiryFormTemplate({
   >('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (customerData: Record<string, unknown>) => {
+  const customerSchemas = createSchemas(customerEntity);
+  const inquirySchemas = createSchemas(inquiryEntity);
+
+  const handleSubmit = async (customerData: InferEntityData<CE>) => {
     setStatus('loading');
     setErrorMessage('');
 
     try {
-      // Use form data as-is. Entity schema + ControlledGdprConsentField already enforce
-      // gdprConsent: { gdprConsent: true, gdprConsentDate, gdprConsentVersion } when checked.
-      const customerId = await addCustomer(customerData);
+      const { id: _omitCustomerId, ...customerCreate } = customerData;
+      void _omitCustomerId;
 
-      // Get inquiry message - use as-is (already has car details as default value)
-      const messageValue = inquiryForm.getValues(messageField);
+      // Pre-mint customer ID so the inquiry can reference it in the same batch.
+      const customerId = generateUUID();
+
+      const messageValue = inquiryForm.getValues(
+        messageField as FieldPath<InferEntityData<IE>>
+      );
       const inquiryMessage =
         typeof messageValue === 'string' ? messageValue.trim() : '';
 
-      // If user didn't edit the default message, use it as-is
       const finalMessage =
         inquiryMessage ||
         defaultMessage ||
         inquiryT('message.default', 'General inquiry');
 
-      // Create inquiry with customer reference (GDPR consent is on Customer, not Inquiry)
-      const inquiryData = {
-        customerId: customerId as string,
-        [contextField]: contextId || undefined,
-        [messageField]: finalMessage,
-        date: new Date().toISOString(),
-        status: 'draft',
-      };
+      const batches: BulkAcrossBatch[] = [
+        {
+          collection: customerEntity.collection,
+          inserts: [{ id: customerId, ...(customerCreate as Record<string, unknown>) }],
+          schemas: {
+            create: customerSchemas.create as BulkAcrossBatch['schemas']['create'],
+            draft: customerSchemas.draft as BulkAcrossBatch['schemas']['draft'],
+          },
+        },
+        {
+          collection: inquiryEntity.collection,
+          inserts: [
+            {
+              customerId,
+              [contextField as string]: contextId || undefined,
+              [messageField as string]: finalMessage,
+              date: new Date().toISOString(),
+              status: 'draft',
+            },
+          ],
+          schemas: {
+            create: inquirySchemas.create as BulkAcrossBatch['schemas']['create'],
+            draft: inquirySchemas.draft as BulkAcrossBatch['schemas']['draft'],
+          },
+          dependsOn: [customerEntity.collection],
+        },
+      ];
 
-      await addInquiry(inquiryData);
+      await bulkAcross(batches);
 
       setStatus('success');
       customerForm.reset();
@@ -185,7 +231,12 @@ export function InquiryFormTemplate({
     } catch (err) {
       setStatus('error');
       const error = err instanceof Error ? err : new Error(String(err));
-      setErrorMessage(error.message);
+      setErrorMessage(
+        inquiryT(
+          'submit.error',
+          'We could not send your inquiry right now. Please try again.'
+        )
+      );
       onError?.(error);
     }
   };
@@ -229,14 +280,14 @@ export function InquiryFormTemplate({
           const firstNameConfig = customerEntity.fields.firstName;
           const lastNameConfig = customerEntity.fields.lastName;
           if (
-            customerFields.includes('firstName') &&
-            customerFields.includes('lastName') &&
+            (customerFields as string[]).includes('firstName') &&
+            (customerFields as string[]).includes('lastName') &&
             firstNameConfig &&
             lastNameConfig
           ) {
             return (
               <>
-                <Stack direction="row">
+                <Stack direction={isMobile ? 'column' : 'row'}>
                   <div style={{ flex: 1 }}>
                     <FormFieldRenderer
                       name="firstName"
@@ -259,12 +310,12 @@ export function InquiryFormTemplate({
                 {customerFields
                   .filter((f) => f !== 'firstName' && f !== 'lastName')
                   .map((fieldName) => {
-                    const config = customerEntity.fields[fieldName];
+                    const config = customerEntity.fields[fieldName as string];
                     if (!config) return null;
                     return (
                       <FormFieldRenderer
-                        key={fieldName}
-                        name={fieldName}
+                        key={String(fieldName)}
+                        name={fieldName as string}
                         config={config}
                         control={customerForm.control}
                         errors={customerForm.formState.errors}
@@ -277,12 +328,12 @@ export function InquiryFormTemplate({
           }
           // Fallback: render all fields individually if firstName/lastName not both present
           return customerFields.map((fieldName) => {
-            const config = customerEntity.fields[fieldName];
+            const config = customerEntity.fields[fieldName as string];
             if (!config) return null;
             return (
               <FormFieldRenderer
-                key={fieldName}
-                name={fieldName}
+                key={String(fieldName)}
+                name={fieldName as string}
                 config={config}
                 control={customerForm.control}
                 errors={customerForm.formState.errors}
@@ -295,7 +346,7 @@ export function InquiryFormTemplate({
         {/* Message field */}
         {messageFieldConfig && (
           <FormFieldRenderer
-            name={messageField}
+            name={messageField as string}
             config={{
               ...messageFieldConfig,
               options: {
@@ -312,10 +363,10 @@ export function InquiryFormTemplate({
         )}
 
         {/* GDPR Consent field - from customerEntity */}
-        {customerEntity.fields[consentField] && (
+        {customerEntity.fields[consentField as string] && (
           <FormFieldRenderer
-            name={consentField}
-            config={customerEntity.fields[consentField]}
+            name={consentField as string}
+            config={customerEntity.fields[consentField as string]!}
             control={customerForm.control}
             errors={customerForm.formState.errors}
             t={customerT}

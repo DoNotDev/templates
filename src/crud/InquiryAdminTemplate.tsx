@@ -37,7 +37,7 @@ import {
   Skeleton,
 } from '@donotdev/components';
 import { useTranslation, formatDate, useBreakpoint } from '@donotdev/core';
-import type { Entity } from '@donotdev/core';
+import type { AnyEntity } from '@donotdev/core';
 import {
   isCrudModuleAvailable,
   useCrud,
@@ -47,14 +47,19 @@ import {
 import type { InferEntityData } from '@donotdev/crud';
 import { Link } from '@donotdev/ui';
 
+import { asPartialEntityData } from './asPartialEntityData';
+
 import type { ReactElement } from 'react';
 
 /** Props for the InquiryAdminTemplate component. */
-export interface InquiryAdminTemplateProps {
+export interface InquiryAdminTemplateProps<
+  CE extends AnyEntity = AnyEntity,
+  IE extends AnyEntity = AnyEntity,
+> {
   /** Customer entity definition (linked via customerId) */
-  customerEntity: Entity;
+  customerEntity: CE;
   /** Inquiry entity definition */
-  inquiryEntity: Entity;
+  inquiryEntity: IE;
   /** Optional base path for customer detail pages (defaults to `/customers`) */
   customerBasePath?: string;
   /** Whether the section is collapsible */
@@ -67,11 +72,14 @@ export interface InquiryAdminTemplateProps {
   onOpenChange?: (open: boolean) => void;
   /** Section title (defaults to inquiry entity name) */
   title?: string;
-  /** Field name for context reference in inquiry (default: 'carId') */
-  contextField?: string;
+  /** Field on the inquiry entity for context reference (showcase default: `carId`) */
+  contextField?: keyof InferEntityData<IE>;
 }
 
-export function InquiryAdminTemplate({
+export function InquiryAdminTemplate<
+  const CE extends AnyEntity,
+  const IE extends AnyEntity,
+>({
   customerEntity,
   inquiryEntity,
   customerBasePath = '/customers',
@@ -80,8 +88,8 @@ export function InquiryAdminTemplate({
   open,
   onOpenChange,
   title,
-  contextField = 'carId',
-}: InquiryAdminTemplateProps): ReactElement | null {
+  contextField = 'carId' as keyof InferEntityData<IE>,
+}: InquiryAdminTemplateProps<CE, IE>): ReactElement | null {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
   // eslint-disable-next-line react-hooks/rules-of-hooks
   if (!isCrudModuleAvailable) return null;
@@ -94,21 +102,18 @@ export function InquiryAdminTemplate({
   const sectionTitle = title || tInquiry('name');
 
   // Fetch all inquiries
-  const { items: inquiries, loading } = useCrudList<
-    InferEntityData<typeof inquiryEntity> & { id: string }
-  >(inquiryEntity);
+  const {
+    items: inquiries,
+    loading,
+    error: fetchError,
+  } = useCrudList(inquiryEntity);
 
   // Fetch all customers in parallel (we'll map them by ID)
-  const { items: customers } = useCrudList<
-    InferEntityData<typeof customerEntity> & { id: string }
-  >(customerEntity);
+  const { items: customers } = useCrudList(customerEntity);
 
   // Create a map of customerId -> customer for quick lookup
   const customersMap = useMemo(() => {
-    const map = new Map<
-      string,
-      InferEntityData<typeof customerEntity> & { id: string }
-    >();
+    const map = new Map<string, InferEntityData<CE>>();
     customers?.forEach((customer) => {
       if (customer.id) {
         map.set(customer.id, customer);
@@ -117,13 +122,16 @@ export function InquiryAdminTemplate({
     return map;
   }, [customers]);
 
-  const { update: updateInquiry } = useCrud<
-    InferEntityData<typeof inquiryEntity> & { id: string }
-  >(inquiryEntity);
+  const { update: updateInquiry } = useCrud(inquiryEntity);
 
   const handleMarkResponded = useCallback(
     async (inquiryId: string) => {
-      await updateInquiry(inquiryId, { status: 'responded' });
+      await updateInquiry(
+        inquiryId,
+        asPartialEntityData<IE>({
+          status: 'responded' as InferEntityData<IE>['status'],
+        })
+      );
       // Cache is automatically updated by CrudService, no manual refresh needed
     },
     [updateInquiry]
@@ -186,6 +194,23 @@ export function InquiryAdminTemplate({
             />
           ))}
         </Grid>
+      ) : fetchError ? (
+        <Stack
+          align="center"
+          justify="center"
+          style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+        >
+          <Text level="h3" style={{ color: 'var(--destructive)' }}>
+            {tCrud('errors.fetchFailed', {
+              defaultValue: 'Failed to load inquiries',
+            })}
+          </Text>
+          <Text level="small" style={{ color: 'var(--destructive)' }}>
+            {fetchError instanceof Error
+              ? fetchError.message
+              : String(fetchError)}
+          </Text>
+        </Stack>
       ) : sortedInquiries.length === 0 ? (
         <Text variant="muted">
           {tCrud('noInquiries', { defaultValue: 'No inquiries found.' })}
@@ -296,7 +321,12 @@ export function InquiryAdminTemplate({
                           className="dndev-flex-1"
                           render={({ children, className, ...props }) => (
                             <Link
-                              path={`mailto:${encodeURIComponent(customerEmail)}${typeof (inquiry as Record<string, unknown>)[contextField] === 'string' && (inquiry as Record<string, unknown>)[contextField] ? `?subject=${encodeURIComponent(tCrud('actions.replySubject', { defaultValue: 'Re: Your inquiry' }))}` : ''}`}
+                              path={`mailto:${encodeURIComponent(customerEmail)}${(() => {
+                                const ctx = inquiry[contextField];
+                                return typeof ctx === 'string' && ctx
+                                  ? `?subject=${encodeURIComponent(tCrud('actions.replySubject', { defaultValue: 'Re: Your inquiry' }))}`
+                                  : '';
+                              })()}`}
                               className={className}
                               onClick={(e) => e.stopPropagation()}
                               {...props}

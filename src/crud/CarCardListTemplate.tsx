@@ -29,6 +29,7 @@ import {
   Section,
   Button,
   Skeleton,
+  Badge,
 } from '@donotdev/components';
 import {
   useTranslation,
@@ -45,7 +46,14 @@ import {
   useEntityFavorites,
   formatValue,
 } from './crudImports';
-import { useNavigate } from '@donotdev/ui';
+
+/** Normalized "sold" for VO / catalog (FR: vendu, EN: sold). */
+function isSoldStatus(value: unknown): boolean {
+  if (value == null || value === '') return false;
+  const n = String(value).toLowerCase().replace(/[\s-]+/g, '_');
+  return n === 'sold' || n === 'vendu';
+}
+import { Link } from '@donotdev/ui';
 
 import type { ReactElement } from 'react';
 
@@ -84,6 +92,11 @@ export interface CarCardListTemplateProps extends Omit<
   imageAspectRatio?: string;
   /** When true, render only the grid (and loading/empty state) without the results Section title/collapsible */
   hideSection?: boolean;
+  /**
+   * Field used for sold overlay (e.g. select `status` with option `sold`).
+   * When omitted, uses the first existing field among: status, state, availability.
+   */
+  statusField?: string;
 }
 
 /**
@@ -96,6 +109,7 @@ export interface CarCardListTemplateProps extends Omit<
  * - Mileage/Year and Transmission/Fuel as specs
  * - Prominent price display
  * - Heart icon for favorites
+ * - “Sold” badge on image when status (or configured field) is sold / vendu
  *
  * @param props - CarCardListTemplate component props
  * @returns React component
@@ -122,12 +136,12 @@ export function CarCardListTemplate({
   locale,
   imageAspectRatio = '16/9',
   hideSection = false,
+  statusField,
 }: CarCardListTemplateProps) {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
   // eslint-disable-next-line react-hooks/rules-of-hooks
   if (!isCrudModuleAvailable) return null;
 
-  const navigate = useNavigate();
   const base = basePath ?? `/${entity.collection}`;
   const collection = entity.collection;
   // Entity + crud so formatValue can resolve crud:price.* etc.
@@ -151,8 +165,20 @@ export function CarCardListTemplate({
     : (cols as number);
   const skeletonCount = currentCols * 3;
 
+  const resolvedStatusField = useMemo(() => {
+    if (statusField) return statusField;
+    const candidates = ['status', 'state', 'availability'];
+    return (
+      candidates.find((name) => entity.fields[name] != null) ?? 'status'
+    );
+  }, [statusField, entity.fields]);
+
   // Data fetching
-  const { data: listData, loading } = useCrudCardList(entity, { staleTime });
+  const {
+    data: listData,
+    loading,
+    error: fetchError,
+  } = useCrudCardList(entity, { staleTime });
   const rawData = listData?.items || [];
 
   // Favorites - always enabled
@@ -191,18 +217,6 @@ export function CarCardListTemplate({
     }
     return result;
   }, [rawData, applyFilters, showFavoritesOnly, favoritesFilter, filter]);
-
-  // Card click: onClick(id) if provided, else navigate to basePath/:id
-  const handleView = useCallback(
-    (id: string) => {
-      if (onClick) {
-        onClick(id);
-      } else {
-        navigate(`${base}/${id}`);
-      }
-    },
-    [base, navigate, onClick]
-  );
 
   const entityName = t('name', { defaultValue: entity.name });
 
@@ -260,6 +274,23 @@ export function CarCardListTemplate({
               />
             ))}
           </Grid>
+        ) : fetchError ? (
+          <Stack
+            align="center"
+            justify="center"
+            style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+          >
+            <Text level="h3" style={{ color: 'var(--destructive)' }}>
+              {tCrud('errors.fetchFailed', {
+                defaultValue: `Failed to load ${entity.name.toLowerCase()}`,
+              })}
+            </Text>
+            <Text level="small" style={{ color: 'var(--destructive)' }}>
+              {fetchError instanceof Error
+                ? fetchError.message
+                : String(fetchError)}
+            </Text>
+          </Stack>
         ) : data.length === 0 ? (
           <Stack
             align="center"
@@ -306,6 +337,23 @@ export function CarCardListTemplate({
                 | null
                 | undefined;
 
+              const statusRaw = item[resolvedStatusField];
+              const statusFieldConfig = entity.fields[resolvedStatusField];
+              const showSoldOverlay =
+                statusFieldConfig != null && isSoldStatus(statusRaw);
+              const soldLabelFormatted =
+                showSoldOverlay && statusFieldConfig
+                  ? formatValue(statusRaw, statusFieldConfig, t, {
+                      compact: true,
+                      asString: true,
+                    })
+                  : '';
+              const soldLabel =
+                typeof soldLabelFormatted === 'string' &&
+                soldLabelFormatted.length > 0
+                  ? soldLabelFormatted
+                  : tCrud('status.sold', { defaultValue: 'Sold' });
+
               const itemIsFavorite = isFavorite(item.id as string);
 
               // Format fields using shared formatter (handles select/radio/switch, i18n, etc.)
@@ -329,66 +377,13 @@ export function CarCardListTemplate({
               // Title: Make + Model
               const title = [make, model].filter(Boolean).join(' ');
 
-              return (
-                <Card
-                  key={item.id as string}
-                  clickable
-                  onClick={() => handleView(item.id as string)}
-                  elevated
-                  style={{
-                    position: 'relative',
-                    padding: 0,
-                    overflow: 'hidden',
-                  }}
-                >
-                  {/* Heart Icon */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(item.id as string);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: 'var(--gap-sm)',
-                      insetInlineEnd: 'var(--gap-sm)',
-                      zIndex: 10,
-                      cursor: 'pointer',
-                      padding: 'var(--gap-xs)',
-                      borderRadius: 'var(--radius-full)',
-                      backgroundColor: 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: 'none',
-                    }}
-                    aria-label={
-                      itemIsFavorite
-                        ? tCrud('favorites.remove', {
-                            defaultValue: 'Remove from favorites',
-                          })
-                        : tCrud('favorites.add', {
-                            defaultValue: 'Add to favorites',
-                          })
-                    }
-                  >
-                    <Heart
-                      fill={itemIsFavorite ? '#ef4444' : '#ffffff'}
-                      stroke={
-                        itemIsFavorite ? '#ef4444' : 'var(--muted-foreground)'
-                      }
-                      style={{
-                        width: 'var(--icon-md)',
-                        height: 'var(--icon-md)',
-                        transition: 'fill 0.2s, stroke 0.2s',
-                      }}
-                    />
-                  </button>
-
+              const cardBody = (
+                <>
                   {/* Image - flush with card, no padding */}
                   {imageUrl && (
                     <div
                       style={{
+                        position: 'relative',
                         width: '100%',
                         aspectRatio: imageAspectRatio,
                         overflow: 'hidden',
@@ -403,6 +398,28 @@ export function CarCardListTemplate({
                           objectFit: 'cover',
                         }}
                       />
+                      {showSoldOverlay && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 'var(--gap-sm)',
+                            insetInlineStart: 'var(--gap-sm)',
+                            zIndex: 2,
+                          }}
+                        >
+                          <Badge variant="destructive">{soldLabel}</Badge>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!imageUrl && showSoldOverlay && (
+                    <div
+                      style={{
+                        padding: 'var(--gap-sm) var(--gap-md) 0',
+                      }}
+                    >
+                      <Badge variant="destructive">{soldLabel}</Badge>
                     </div>
                   )}
 
@@ -532,7 +549,72 @@ export function CarCardListTemplate({
                       )}
                     </Stack>
                   </Stack>
-                </Card>
+                </>
+              );
+
+              const cardStyle = {
+                position: 'relative' as const,
+                padding: 0,
+                overflow: 'hidden',
+              };
+
+              return (
+                <div key={item.id as string} style={{ position: 'relative' }}>
+                  {onClick ? (
+                    <Card
+                      clickable
+                      onClick={() => onClick(item.id as string)}
+                      elevated
+                      style={cardStyle}
+                    >
+                      {cardBody}
+                    </Card>
+                  ) : (
+                    <Card asChild clickable elevated style={cardStyle}>
+                      <Link path={`${base}/${item.id}`}>{cardBody}</Link>
+                    </Card>
+                  )}
+                  {/* Heart Icon - sibling to Card to avoid invalid <button> inside <a> */}
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(item.id as string)}
+                    style={{
+                      position: 'absolute',
+                      top: 'var(--gap-sm)',
+                      insetInlineEnd: 'var(--gap-sm)',
+                      zIndex: 10,
+                      cursor: 'pointer',
+                      padding: 'var(--gap-xs)',
+                      borderRadius: 'var(--radius-full)',
+                      backgroundColor: 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: 'none',
+                    }}
+                    aria-label={
+                      itemIsFavorite
+                        ? tCrud('favorites.remove', {
+                            defaultValue: 'Remove from favorites',
+                          })
+                        : tCrud('favorites.add', {
+                            defaultValue: 'Add to favorites',
+                          })
+                    }
+                  >
+                    <Heart
+                      fill={itemIsFavorite ? '#ef4444' : '#ffffff'}
+                      stroke={
+                        itemIsFavorite ? '#ef4444' : 'var(--muted-foreground)'
+                      }
+                      style={{
+                        width: 'var(--icon-md)',
+                        height: 'var(--icon-md)',
+                        transition: 'fill 0.2s, stroke 0.2s',
+                      }}
+                    />
+                  </button>
+                </div>
               );
             })}
           </Grid>

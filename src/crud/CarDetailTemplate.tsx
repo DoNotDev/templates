@@ -20,6 +20,7 @@ import {
   Text,
   Section,
   Button,
+  CopyToClipboard,
   ImageGallery,
   Spinner,
 } from '@donotdev/components';
@@ -33,7 +34,7 @@ import {
   useRelatedItems,
   useEntityFavorites,
 } from './crudImports';
-import { PageContainer, Link, useRouteParam, useNavigate } from '@donotdev/ui';
+import { PageContainer, Link, useRouteParam } from '@donotdev/ui';
 
 import { InquiryFormTemplate } from './InquiryFormTemplate';
 
@@ -106,7 +107,6 @@ export function CarDetailTemplate({
   // ALL HOOKS MUST BE AT THE TOP - no early returns before hooks
   const routeId = useRouteParam('id');
   const id = propId || routeId || '';
-  const navigate = useNavigate();
 
   // Translations — entity + crud so formatValue can resolve crud:price.* etc.
   const entityNs = entity.namespace || `entity-${entity.name.toLowerCase()}`;
@@ -315,23 +315,16 @@ export function CarDetailTemplate({
       });
   }, [id, get]);
 
-  // Share handler
+  const canNativeShare = typeof navigator !== 'undefined' && !!navigator.share;
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+  // Share handler — only used when navigator.share is available
   const handleShare = async () => {
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-    if (!shareUrl) return;
+    const url = window.location.href;
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: vehicleName,
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-      }
+      await navigator.share({ title: vehicleName, url });
     } catch (err) {
-      // Swallow AbortError (user dismissed native share sheet)
       if (err instanceof Error && err.name === 'AbortError') return;
-      // Log non-abort errors in dev only — never re-throw in async onClick handlers
       if (process.env.NODE_ENV === 'development') {
         console.warn('[CarDetail] Share failed:', err);
       }
@@ -459,6 +452,7 @@ export function CarDetailTemplate({
               {customerEntity && inquiryEntity ? (
                 <Button
                   variant="primary"
+                  display="full"
                   style={{ flex: 1 }}
                   onClick={() => {
                     const formSection = document.getElementById('inquiry-form');
@@ -473,20 +467,34 @@ export function CarDetailTemplate({
                   {tPage('contactUs', 'Contact us')}
                 </Button>
               ) : (
-                <Button variant="primary" style={{ flex: 1 }} disabled>
+                <Button variant="primary" display="full" style={{ flex: 1 }} disabled>
                   {tPage('contactUs', 'Contact us')}
                 </Button>
               )}
-              <Button
-                variant="outline"
-                icon={<Share2 size={18} />}
-                onClick={handleShare}
-              >
-                {tPage('share', 'Share')}
-              </Button>
+              {canNativeShare ? (
+                <Button
+                  variant="outline"
+                  icon={<Share2 />}
+                  display="auto"
+                  onClick={handleShare}
+                >
+                  {tPage('share', 'Share')}
+                </Button>
+              ) : (
+                <CopyToClipboard
+                  text={shareUrl}
+                  variant="outline"
+                  display="auto"
+                  tooltipText={tPage('share', 'Share')}
+                  copiedTooltipText={tPage('shareCopied', 'Link copied!')}
+                >
+                  {tPage('share', 'Share')}
+                </CopyToClipboard>
+              )}
               <Button
                 variant={saved ? 'primary' : 'outline'}
                 icon={<Heart size={18} />}
+                display="auto"
                 onClick={() => toggleFavorite(id)}
               >
                 {saved ? tPage('saved', 'Saved') : tPage('save', 'Save')}
@@ -549,69 +557,70 @@ export function CarDetailTemplate({
               const vModel = (vehicle[modelField] as string) || '';
 
               return (
-                <Card
-                  key={vehicle.id as string}
-                  clickable
-                  onClick={() =>
-                    navigate(`/${entity.collection}/${vehicle.id}`)
-                  }
-                  elevated
-                >
-                  <Stack direction="column">
-                    {imageUrl && (
-                      <div
-                        style={{
-                          width: '100%',
-                          aspectRatio: '16/9',
-                          borderRadius: 'var(--radius-md)',
-                          overflow: 'hidden',
-                          backgroundColor: 'var(--muted)',
-                        }}
-                      >
-                        <img
-                          src={imageUrl as string}
-                          alt={`${vMake} ${vModel}`}
+                <Card key={vehicle.id as string} asChild clickable elevated>
+                  <Link path={`/${entity.collection}/${vehicle.id}`}>
+                    <Stack direction="column">
+                      {imageUrl && (
+                        <div
                           style={{
                             width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
+                            aspectRatio: '16/9',
+                            borderRadius: 'var(--radius-md)',
+                            overflow: 'hidden',
+                            backgroundColor: 'var(--muted)',
                           }}
-                        />
-                      </div>
-                    )}
-                    <Stack direction="column" gap="tight">
-                      <Text level="h4" style={{ margin: 0 }}>
-                        {vMake} {vModel}
-                      </Text>
-                      <Text variant="muted">
-                        {vehicle[yearField] as string}
-                      </Text>
-                      {(() => {
-                        const priceValue = vehicle[priceField];
-                        const config = entity.fields[priceField];
-                        if (priceValue == null || !config) return null;
-                        const priceDisplay = formatValue(
-                          priceValue,
-                          config,
-                          tEntity,
-                          { compact: true }
-                        );
-                        return typeof priceDisplay === 'string' ? (
-                          <Text
-                            style={{ fontWeight: 700, color: 'var(--accent)' }}
-                          >
-                            {priceDisplay}
-                          </Text>
-                        ) : (
-                          <div
-                            style={{ fontWeight: 700, color: 'var(--accent)' }}
-                          >
-                            {priceDisplay}
-                          </div>
-                        );
-                      })()}
+                        >
+                          <img
+                            src={imageUrl as string}
+                            alt={`${vMake} ${vModel}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                            }}
+                          />
+                        </div>
+                      )}
+                      <Stack direction="column" gap="tight">
+                        <Text level="h4" style={{ margin: 0 }}>
+                          {vMake} {vModel}
+                        </Text>
+                        <Text variant="muted">
+                          {vehicle[yearField] as string}
+                        </Text>
+                        {(() => {
+                          const priceValue = vehicle[priceField];
+                          const config = entity.fields[priceField];
+                          if (priceValue == null || !config) return null;
+                          const priceDisplay = formatValue(
+                            priceValue,
+                            config,
+                            tEntity,
+                            { compact: true }
+                          );
+                          return typeof priceDisplay === 'string' ? (
+                            <Text
+                              style={{
+                                fontWeight: 700,
+                                color: 'var(--accent)',
+                              }}
+                            >
+                              {priceDisplay}
+                            </Text>
+                          ) : (
+                            <div
+                              style={{
+                                fontWeight: 700,
+                                color: 'var(--accent)',
+                              }}
+                            >
+                              {priceDisplay}
+                            </div>
+                          );
+                        })()}
+                      </Stack>
                     </Stack>
-                  </Stack>
+                  </Link>
                 </Card>
               );
             })}

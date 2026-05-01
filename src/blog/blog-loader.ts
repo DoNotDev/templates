@@ -1,4 +1,6 @@
 // packages/templates/src/blog/blog-loader.ts
+/// <reference path="./virtual.d.ts" />
+import blogContent from '@donotdev/blog-content';
 
 /**
  * @fileoverview Blog data loader utilities
@@ -212,6 +214,25 @@ function parseFilePath(path: string): { slug: string; lang: string } | null {
  * const filtered = blog.getPostsByTag('react'); // Posts tagged 'react'
  * ```
  */
+/**
+ * Get a blog loader for the given language.
+ * Automatically uses blog content discovered by the framework.
+ * Falls back to 'en' if no translation exists.
+ *
+ * @param lang - Language code (e.g. 'en', 'fr'). Defaults to 'en'.
+ * @returns Blog loader with getAllPosts(), getPostBySlug(), getAllTags(), getPostsByTag()
+ *
+ * @example
+ * ```ts
+ * import { getBlogLoader } from '@donotdev/templates';
+ * const blog = getBlogLoader(i18n.language);
+ * const posts = blog.getAllPosts();
+ * ```
+ */
+export function getBlogLoader(lang: string = 'en'): BlogLoader {
+  return createBlogLoader(blogContent, lang);
+}
+
 export function createBlogLoader(
   globResult: Record<string, string>,
   currentLang: string
@@ -228,6 +249,7 @@ export function createBlogLoader(
     }
     bySlug.get(parsed.slug)!.set(parsed.lang, raw);
   }
+
 
   // Resolve posts for current language with en fallback
   const resolvedPosts: BlogPost[] = [];
@@ -263,8 +285,9 @@ export function createBlogLoader(
 
   return {
     getAllPosts: () => resolvedPosts,
-    getPostBySlug: (slug: string) =>
-      resolvedPosts.find((p) => p.slug === slug) || null,
+    getPostBySlug: (slug: string) => {
+      return resolvedPosts.find((p) => p.slug === slug) || null;
+    },
     getAllTags: () => allTags,
     getPostsByTag: (tag: string) =>
       resolvedPosts.filter((p) => p.tags.includes(tag.toLowerCase())),
