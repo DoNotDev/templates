@@ -250,7 +250,6 @@ export function createBlogLoader(
     bySlug.get(parsed.slug)!.set(parsed.lang, raw);
   }
 
-
   // Resolve posts for current language with en fallback
   const resolvedPosts: BlogPost[] = [];
 

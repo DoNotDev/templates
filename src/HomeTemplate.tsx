@@ -12,6 +12,7 @@
  */
 
 import { Zap, Shield, Rocket, UserPlus, Settings, Play } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { Roadmap } from '@donotdev/components';
 import {
@@ -27,8 +28,6 @@ import {
 import type { RoadmapStep } from '@donotdev/components';
 import { useTranslation } from '@donotdev/core';
 import { PageContainer } from '@donotdev/ui';
-
-import type { ReactNode } from 'react';
 
 /**
  * Feature card data

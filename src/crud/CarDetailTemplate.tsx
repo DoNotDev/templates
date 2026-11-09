@@ -12,6 +12,7 @@
 
 import { Share2, Heart } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import type { ReactElement } from 'react';
 
 import {
   Grid,
@@ -26,6 +27,8 @@ import {
 } from '@donotdev/components';
 import { useTranslation } from '@donotdev/core';
 import type { Entity } from '@donotdev/core';
+import { PageContainer, Link, useRouteParam } from '@donotdev/ui';
+
 import {
   isCrudModuleAvailable,
   useCrud,
@@ -34,11 +37,7 @@ import {
   useRelatedItems,
   useEntityFavorites,
 } from './crudImports';
-import { PageContainer, Link, useRouteParam } from '@donotdev/ui';
-
 import { InquiryFormTemplate } from './InquiryFormTemplate';
-
-import type { ReactElement } from 'react';
 
 /** Props for the CarDetailTemplate component. */
 export interface CarDetailTemplateProps {
@@ -101,7 +100,7 @@ export function CarDetailTemplate({
   pageNamespace,
 }: CarDetailTemplateProps): ReactElement | null {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   if (!isCrudModuleAvailable) return null;
 
   // ALL HOOKS MUST BE AT THE TOP - no early returns before hooks
@@ -467,7 +466,12 @@ export function CarDetailTemplate({
                   {tPage('contactUs', 'Contact us')}
                 </Button>
               ) : (
-                <Button variant="primary" display="full" style={{ flex: 1 }} disabled>
+                <Button
+                  variant="primary"
+                  display="full"
+                  style={{ flex: 1 }}
+                  disabled
+                >
                   {tPage('contactUs', 'Contact us')}
                 </Button>
               )}

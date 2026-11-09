@@ -15,7 +15,6 @@
 
 import { useState } from 'react';
 
-import { ProductCard } from './billingImports';
 import {
   Badge,
   BADGE_VARIANT,
@@ -36,6 +35,8 @@ import {
   useBillingVisibility,
   FeatureDisabled,
 } from '@donotdev/ui';
+
+import { ProductCard } from './billingImports';
 
 /**
  * Subscription plan type

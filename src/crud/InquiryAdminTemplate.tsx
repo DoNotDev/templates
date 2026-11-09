@@ -25,6 +25,7 @@
 
 import { Mail, Phone, User, CheckCircle2, Clock } from 'lucide-react';
 import { useMemo, useCallback } from 'react';
+import type { ReactElement } from 'react';
 
 import {
   Button,
@@ -38,18 +39,16 @@ import {
 } from '@donotdev/components';
 import { useTranslation, formatDate, useBreakpoint } from '@donotdev/core';
 import type { AnyEntity } from '@donotdev/core';
+import type { InferEntityData } from '@donotdev/crud';
+import { Link } from '@donotdev/ui';
+
+import { asPartialEntityData } from './asPartialEntityData';
 import {
   isCrudModuleAvailable,
   useCrud,
   useCrudList,
   translateLabel,
 } from './crudImports';
-import type { InferEntityData } from '@donotdev/crud';
-import { Link } from '@donotdev/ui';
-
-import { asPartialEntityData } from './asPartialEntityData';
-
-import type { ReactElement } from 'react';
 
 /** Props for the InquiryAdminTemplate component. */
 export interface InquiryAdminTemplateProps<
@@ -91,7 +90,7 @@ export function InquiryAdminTemplate<
   contextField = 'carId' as keyof InferEntityData<IE>,
 }: InquiryAdminTemplateProps<CE, IE>): ReactElement | null {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   if (!isCrudModuleAvailable) return null;
 
   const { t: tInquiry } = useTranslation(

@@ -10,10 +10,10 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentType, ReactNode } from 'react';
+
 import { Section, Stack } from '@donotdev/components';
 import { useTranslation, formatDate } from '@donotdev/core';
-
-import type { ComponentType, ReactNode } from 'react';
 
 /**
  * Terms of Service Template Configuration

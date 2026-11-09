@@ -25,21 +25,26 @@
  */
 
 import { useState } from 'react';
+import type { ReactElement, FormEvent } from 'react';
+import type { FieldPath } from 'react-hook-form';
 
 import { Stack, Button, Card, Alert, Text } from '@donotdev/components';
-import { useTranslation, generateUUID, createSchemas, useBreakpoint } from '@donotdev/core';
+import {
+  useTranslation,
+  generateUUID,
+  createSchemas,
+  useBreakpoint,
+} from '@donotdev/core';
 import type { AnyEntity, BulkAcrossBatch } from '@donotdev/core';
 import type { InferEntityData } from '@donotdev/crud';
+
+import { asPartialEntityData } from './asPartialEntityData';
 import {
   isCrudModuleAvailable,
   useCrud,
   useEntityForm,
   FormFieldRenderer,
 } from './crudImports';
-import { asPartialEntityData } from './asPartialEntityData';
-
-import type { ReactElement, FormEvent } from 'react';
-import type { FieldPath } from 'react-hook-form';
 
 /** Props for the InquiryFormTemplate component. */
 export interface InquiryFormTemplateProps<
@@ -108,7 +113,7 @@ export function InquiryFormTemplate<
   onError,
 }: InquiryFormTemplateProps<CE, IE>): ReactElement | null {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   if (!isCrudModuleAvailable) return null;
 
   const { bulkAcross } = useCrud(customerEntity);
@@ -197,9 +202,12 @@ export function InquiryFormTemplate<
       const batches: BulkAcrossBatch[] = [
         {
           collection: customerEntity.collection,
-          inserts: [{ id: customerId, ...(customerCreate as Record<string, unknown>) }],
+          inserts: [
+            { id: customerId, ...(customerCreate as Record<string, unknown>) },
+          ],
           schemas: {
-            create: customerSchemas.create as BulkAcrossBatch['schemas']['create'],
+            create:
+              customerSchemas.create as BulkAcrossBatch['schemas']['create'],
             draft: customerSchemas.draft as BulkAcrossBatch['schemas']['draft'],
           },
         },
@@ -215,7 +223,8 @@ export function InquiryFormTemplate<
             },
           ],
           schemas: {
-            create: inquirySchemas.create as BulkAcrossBatch['schemas']['create'],
+            create:
+              inquirySchemas.create as BulkAcrossBatch['schemas']['create'],
             draft: inquirySchemas.draft as BulkAcrossBatch['schemas']['draft'],
           },
           dependsOn: [customerEntity.collection],

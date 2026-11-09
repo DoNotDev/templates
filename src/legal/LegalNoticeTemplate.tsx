@@ -10,10 +10,10 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentType } from 'react';
+
 import { Text, Section, Stack } from '@donotdev/components';
 import { useTranslation, formatDate } from '@donotdev/core';
-
-import type { ComponentType } from 'react';
 
 /**
  * Legal Notice Template Configuration

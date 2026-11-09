@@ -10,10 +10,11 @@
  * @author AMBROISE PARK Consulting
  */
 
-import { SubscriptionManager } from './billingImports';
 import { useTranslation } from '@donotdev/core';
 import type { PageMeta } from '@donotdev/core';
 import { PageContainer } from '@donotdev/ui';
+
+import { SubscriptionManager } from './billingImports';
 
 /** Props for the UserSubscriptionTemplate component. */
 export interface UserSubscriptionTemplateProps {

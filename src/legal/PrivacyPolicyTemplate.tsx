@@ -10,10 +10,10 @@
  * @author AMBROISE PARK Consulting
  */
 
+import type { ComponentType, ReactNode } from 'react';
+
 import { List, Section, Stack } from '@donotdev/components';
 import { useTranslation, formatDate } from '@donotdev/core';
-
-import type { ComponentType, ReactNode } from 'react';
 
 /**
  * Privacy Policy Template Configuration

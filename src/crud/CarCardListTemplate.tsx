@@ -37,6 +37,7 @@ import {
   useBreakpoint,
 } from '@donotdev/core';
 import type { EntityCardListProps } from '@donotdev/core';
+
 import {
   isCrudModuleAvailable,
   useCrudCardList,
@@ -50,7 +51,9 @@ import {
 /** Normalized "sold" for VO / catalog (FR: vendu, EN: sold). */
 function isSoldStatus(value: unknown): boolean {
   if (value == null || value === '') return false;
-  const n = String(value).toLowerCase().replace(/[\s-]+/g, '_');
+  const n = String(value)
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_');
   return n === 'sold' || n === 'vendu';
 }
 import { Link } from '@donotdev/ui';
@@ -139,7 +142,7 @@ export function CarCardListTemplate({
   statusField,
 }: CarCardListTemplateProps) {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   if (!isCrudModuleAvailable) return null;
 
   const base = basePath ?? `/${entity.collection}`;
@@ -168,9 +171,7 @@ export function CarCardListTemplate({
   const resolvedStatusField = useMemo(() => {
     if (statusField) return statusField;
     const candidates = ['status', 'state', 'availability'];
-    return (
-      candidates.find((name) => entity.fields[name] != null) ?? 'status'
-    );
+    return candidates.find((name) => entity.fields[name] != null) ?? 'status';
   }, [statusField, entity.fields]);
 
   // Data fetching

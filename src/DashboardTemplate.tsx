@@ -19,6 +19,8 @@ import {
   ShoppingCart,
   Users,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import {
   Badge,
@@ -34,9 +36,6 @@ import {
 } from '@donotdev/components';
 import { useTranslation } from '@donotdev/core';
 import { PageContainer } from '@donotdev/ui';
-
-import type { LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
 
 /**
  * Single stat card data

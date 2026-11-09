@@ -18,15 +18,15 @@
  */
 
 import { useEffect } from 'react';
+import type { ReactNode } from 'react';
 
-import { isAuthModuleAvailable, MultipleAuthProviders } from './authImports';
 import { HeroSection, Section, Text, Stack } from '@donotdev/components';
+import { Spinner } from '@donotdev/components';
 import {
   useTranslation,
   useAppConfig,
   getPlatformEnvVar,
 } from '@donotdev/core';
-import { Spinner } from '@donotdev/components';
 import {
   PageContainer,
   useNavigate,
@@ -35,7 +35,7 @@ import {
   Link,
 } from '@donotdev/ui';
 
-import type { ReactNode } from 'react';
+import { isAuthModuleAvailable, MultipleAuthProviders } from './authImports';
 
 /** Props for the AdminLandingTemplate component. */
 export interface AdminLandingTemplateProps {

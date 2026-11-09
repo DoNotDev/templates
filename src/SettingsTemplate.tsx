@@ -12,14 +12,13 @@
  */
 
 import { Globe, Bell, Palette } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { Card, Section, Stack, Switch, Tabs, Text } from '@donotdev/components';
 import type { TabItem } from '@donotdev/components';
 import { useTranslation } from '@donotdev/core';
 import { useLayout, useTheme } from '@donotdev/core';
 import { PageContainer } from '@donotdev/ui';
-
-import type { ReactNode } from 'react';
 
 /**
  * SettingsTemplate props

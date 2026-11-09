@@ -38,6 +38,8 @@ import {
   useBreakpoint,
 } from '@donotdev/core';
 import type { EntityCardListProps } from '@donotdev/core';
+import { Link } from '@donotdev/ui';
+
 import {
   isCrudModuleAvailable,
   translateFieldLabel,
@@ -48,7 +50,6 @@ import {
   formatValue,
   useCrudFilters,
 } from './crudImports';
-import { Link } from '@donotdev/ui';
 
 /** Props for the ProductCardListTemplate component. */
 export interface ProductCardListTemplateProps extends Omit<
@@ -144,7 +145,7 @@ export function ProductCardListTemplate({
   hideSection = false,
 }: ProductCardListTemplateProps) {
   // Safe guard: isCrudModuleAvailable is a module-level constant (immutable after load).
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   if (!isCrudModuleAvailable) return null;
 
   const base = basePath ?? `/${entity.collection}`;

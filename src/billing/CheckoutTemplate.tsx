@@ -12,22 +12,28 @@
  *
  * @see {@link https://donotdev.com/docs/templates} for customization guide
  *
- * @version 0.1.0
+ * @version 0.2.0
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
 
-import { StripeCheckoutButton } from './billingImports';
+import type { ReactNode } from 'react';
+
 import { Card, BUTTON_VARIANT, Stack } from '@donotdev/components';
 import { useTranslation } from '@donotdev/core';
-import type { CheckoutMode } from '@donotdev/core';
+import type { CheckoutLineItemInput, CheckoutMode } from '@donotdev/core';
 import { useBillingVisibility, FeatureDisabled } from '@donotdev/ui';
 
-import type { ReactNode } from 'react';
+import { StripeCheckoutButton } from './billingImports';
 
 /** Props for the CheckoutPageTemplate component. */
 export interface CheckoutPageTemplateProps {
   children?: ReactNode;
+  /** Key in the app's StripeBackConfig. 0.1.x callers may pass `billingOptions.metadata.billingConfigKey`. */
+  configKey?: string;
+  /** Requested lines (StripeOrder). Defaults to the single product. */
+  lineItems?: CheckoutLineItemInput[];
+  /** 0.1.x: shows the checkout button and is passed to StripeCheckoutButton. Prefer `configKey`. */
   priceId?: string;
   mode?: CheckoutMode;
   title?: string;
@@ -45,16 +51,25 @@ export interface CheckoutPageTemplateProps {
 /**
  * Checkout Page Template Component
  *
- * Pre-built checkout page template using framework components
+ * Pre-built checkout page template using framework components.
+ * Shows the checkout button when a config key (`configKey`, else
+ * `billingOptions.metadata.billingConfigKey`) or a 0.1.x `priceId` is set.
+ *
+ * @example
+ * ```tsx
+ * <CheckoutPageTemplate configKey="pro_monthly" mode="subscription" />
+ * ```
  *
  * @param props - CheckoutPageTemplate component props
  * @returns React component
- * @version 0.1.0
+ * @version 0.2.0
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
 export function CheckoutPageTemplate({
   children,
+  configKey,
+  lineItems,
   priceId,
   mode = 'payment',
   title,
@@ -65,6 +80,8 @@ export function CheckoutPageTemplate({
 }: CheckoutPageTemplateProps) {
   const { shouldHide, isLoading } = useBillingVisibility();
   const { t } = useTranslation('billing');
+  // Same key resolution as useStripeBilling `checkout` (which receives both below)
+  const billingConfigKey = configKey ?? billingOptions?.metadata?.billingConfigKey;
 
   if (shouldHide) {
     return (
@@ -120,9 +137,11 @@ export function CheckoutPageTemplate({
         <Stack gap="large" style={{ marginTop: 'var(--gap-lg)' }}>
           {children && <div>{children}</div>}
 
-          {priceId ? (
+          {billingConfigKey || priceId ? (
             <div>
               <StripeCheckoutButton
+                configKey={billingConfigKey}
+                lineItems={lineItems}
                 priceId={priceId}
                 mode={mode}
                 successUrl={

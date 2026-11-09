@@ -11,14 +11,10 @@
  * - Links → framework Link (internal / external) or native `<a>` (hash-only, e.g. footnotes)
  * - Images → native `<img>` with lazy loading and async decoding
  *
- * **Security: Author-controlled content only.**
- * This component is designed for rendering trusted markdown (e.g. blog posts written by the app author).
- * Raw HTML in markdown is intentionally preserved to allow custom styling (e.g. `<span style="color:red">`).
- * A lightweight regex sanitizer strips known XSS vectors (script, iframe, event handlers, dangerous URIs)
- * but **does NOT provide full protection against adversarial input**.
- * Do NOT use this component to render user-submitted or untrusted markdown.
- * For user-generated content, use a library like react-markdown (AST-based, no HTML pass-through)
- * or add DOMPurify sanitization.
+ * **Security:** the rendered HTML goes through `sanitizeHtml` (DOMPurify in the browser,
+ * DOMPurify + jsdom during SSR) with DOMPurify's safe defaults. Raw HTML in markdown keeps
+ * safe markup and inline styles (e.g. `<span style="color:red">`); scripts, event handlers
+ * and dangerous URIs are removed.
  *
  * @version 0.1.0
  * @since 0.0.1
@@ -30,65 +26,16 @@ import parse, {
   domToReact,
   Element,
 } from 'html-react-parser';
+import type { DOMNode } from 'html-react-parser';
 import { marked } from 'marked';
 import markedFootnote from 'marked-footnote';
 import { memo, useMemo } from 'react';
-
-import { Code, cn } from '@donotdev/components';
-import { Link } from '@donotdev/ui';
-
-import type { DOMNode } from 'html-react-parser';
 import type { ComponentType } from 'react';
 
+import { Code, cn, sanitizeHtml } from '@donotdev/components';
+import { Link } from '@donotdev/ui';
+
 marked.use(markedFootnote());
-
-/**
- * @security Regex-based sanitization for author-controlled content only.
- * For untrusted user content, use DOMPurify or equivalent server-side sanitization.
- */
-// ── Lightweight HTML sanitizer (no DOMPurify dependency) ──
-// Strips known XSS vectors from marked-generated HTML before parsing.
-// Run iteratively to catch nested/reconstructed tags (e.g., <scr<script>ipt>).
-const DANGEROUS_TAGS_RE =
-  /<\/?(?:script|iframe|object|embed|form|base|meta|link|style|applet|svg|math)[\s>\/][^]*?(?:<\/(?:script|iframe|object|embed|form|base|meta|link|style|applet|svg|math)>|\/?>)/gi;
-const DANGEROUS_SELF_CLOSING_RE =
-  /<(?:script|iframe|object|embed|form|base|meta|link|applet|svg|math)\s*\/?\s*>/gi;
-const EVENT_HANDLER_RE = /\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
-const DANGEROUS_URI_RE =
-  /\s+(?:href|src|xlink:href|action|formaction)\s*=\s*(?:"[^"]*"|'[^']*')/gi;
-
-/** Check if a URI attribute value contains a dangerous scheme */
-function hasDangerousScheme(attrMatch: string): boolean {
-  const valueMatch = /=\s*["']([^"']*)["']/.exec(attrMatch);
-  if (!valueMatch) return false;
-  const value = (valueMatch[1] ?? '')
-    .replace(/[\s\u0000-\u001f]/g, '') // strip whitespace and control chars
-    .replace(/&#x?[0-9a-f]+;?/gi, '') // strip numeric HTML entities used to obfuscate
-    .replace(
-      /&(?:amp|lt|gt|quot|apos|tab|newline|lpar|rpar|sol|colon|semi);?/gi,
-      ''
-    ) // strip named entities
-    .toLowerCase();
-  return /^(?:javascript|data|vbscript):/.test(value);
-}
-
-function sanitizeHtml(html: string): string {
-  // Loop until stable to catch tags reconstructed after stripping (max 5 iterations as safety limit)
-  let result = html;
-  for (let i = 0; i < 5; i++) {
-    const before = result;
-    result = result
-      .replace(DANGEROUS_TAGS_RE, '')
-      .replace(DANGEROUS_SELF_CLOSING_RE, '')
-      .replace(EVENT_HANDLER_RE, '');
-    // Strip href/src with dangerous schemes (javascript:, data:, vbscript:)
-    result = result.replace(DANGEROUS_URI_RE, (match) =>
-      hasDangerousScheme(match) ? '' : match
-    );
-    if (result === before) break; // stable — no more changes
-  }
-  return result;
-}
 
 /** Props for the MarkdownViewer component. */
 export interface MarkdownViewerProps {

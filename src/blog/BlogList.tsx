@@ -14,13 +14,13 @@
  */
 
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { Card, Grid, Stack, Tag, Text } from '@donotdev/components';
 import { useTranslation } from '@donotdev/core';
 import { Link } from '@donotdev/ui';
 
 import type { BlogPost } from './blog-loader';
-import type { ReactNode } from 'react';
 
 /**
  * Props for the BlogList component.

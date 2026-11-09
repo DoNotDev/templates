@@ -12,14 +12,8 @@
  */
 
 import { CreditCard, Lock, LogOut, Trash2, User } from 'lucide-react';
+import type { ReactNode } from 'react';
 
-import {
-  isAuthModuleAvailable,
-  useAuth,
-  useDeleteAccount,
-  ConfirmDeleteDialog,
-  ReauthDialog,
-} from './authImports';
 import {
   Avatar,
   Badge,
@@ -35,7 +29,13 @@ import {
 import { useTranslation } from '@donotdev/core';
 import { PageContainer } from '@donotdev/ui';
 
-import type { ReactNode } from 'react';
+import {
+  isAuthModuleAvailable,
+  useAuth,
+  useDeleteAccount,
+  ConfirmDeleteDialog,
+  ReauthDialog,
+} from './authImports';
 
 /**
  * ProfileTemplate props
@@ -69,7 +69,7 @@ export function ProfileTemplate({
   children,
 }: ProfileTemplateProps) {
   // Safe guard: isAuthModuleAvailable is a module-level constant (immutable after load).
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   if (!isAuthModuleAvailable) return null;
 
   const { t } = useTranslation(namespace ? [namespace, 'dndev'] : 'dndev');

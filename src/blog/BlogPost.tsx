@@ -17,9 +17,8 @@
 import { HeroSection, Section, Text } from '@donotdev/components';
 import { useTranslation } from '@donotdev/core';
 
-import { MarkdownViewer } from '../components/MarkdownViewer';
-
 import type { BlogPost as BlogPostType } from './blog-loader';
+import { MarkdownViewer } from '../components/MarkdownViewer';
 
 /**
  * Props for the BlogPostView component.
