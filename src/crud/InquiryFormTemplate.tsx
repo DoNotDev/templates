@@ -302,7 +302,6 @@ export function InquiryFormTemplate<
                       name="firstName"
                       config={firstNameConfig}
                       control={customerForm.control}
-                      errors={customerForm.formState.errors}
                       t={customerT}
                     />
                   </div>
@@ -311,7 +310,6 @@ export function InquiryFormTemplate<
                       name="lastName"
                       config={lastNameConfig}
                       control={customerForm.control}
-                      errors={customerForm.formState.errors}
                       t={customerT}
                     />
                   </div>
@@ -327,7 +325,6 @@ export function InquiryFormTemplate<
                         name={fieldName as string}
                         config={config}
                         control={customerForm.control}
-                        errors={customerForm.formState.errors}
                         t={customerT}
                       />
                     );
@@ -345,7 +342,6 @@ export function InquiryFormTemplate<
                 name={fieldName as string}
                 config={config}
                 control={customerForm.control}
-                errors={customerForm.formState.errors}
                 t={customerT}
               />
             );
@@ -366,7 +362,6 @@ export function InquiryFormTemplate<
               },
             }}
             control={inquiryForm.control}
-            errors={inquiryForm.formState.errors}
             t={inquiryT}
           />
         )}
@@ -377,7 +372,6 @@ export function InquiryFormTemplate<
             name={consentField as string}
             config={customerEntity.fields[consentField as string]!}
             control={customerForm.control}
-            errors={customerForm.formState.errors}
             t={customerT}
           />
         )}
