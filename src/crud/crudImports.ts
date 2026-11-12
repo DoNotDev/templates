@@ -22,6 +22,7 @@ export const isCrudModuleAvailable = typeof crudModule?.useCrud === 'function';
 
 // --- Hooks ---
 export const useCrud = crudModule?.useCrud;
+export const useCrudDoc = crudModule?.useCrudDoc;
 export const useCrudList = crudModule?.useCrudList;
 export const useCrudCardList = crudModule?.useCrudCardList;
 export const useCrudFilters = crudModule?.useCrudFilters;

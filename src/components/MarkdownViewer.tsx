@@ -25,6 +25,7 @@ import parse, {
   attributesToProps,
   domToReact,
   Element,
+  Text,
 } from 'html-react-parser';
 import type { DOMNode } from 'html-react-parser';
 import { marked } from 'marked';
@@ -49,7 +50,7 @@ export interface MarkdownViewerProps {
 function getText(el: Element): string {
   let t = '';
   for (const c of el.children) {
-    if (c.type === 'text') t += (c as unknown as { data: string }).data;
+    if (c instanceof Text) t += c.data;
     else if (c instanceof Element) t += getText(c);
   }
   return t;

@@ -11,7 +11,7 @@
  */
 
 import { Share2, Heart } from 'lucide-react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { ReactElement } from 'react';
 
 import {
@@ -31,7 +31,7 @@ import { PageContainer, Link, useRouteParam } from '@donotdev/ui';
 
 import {
   isCrudModuleAvailable,
-  useCrud,
+  useCrudDoc,
   useCrudCardList,
   formatValue,
   useRelatedItems,
@@ -118,15 +118,14 @@ export function CarDetailTemplate({
   const effectiveLocale =
     locale || i18n?.language?.replace('_', '-') || 'en-US';
 
-  // State for vehicle data
-  const { get } = useCrud(entity);
-  const [vehicleData, setVehicleData] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
-  const [status, setStatus] = useState<'pending' | 'success' | 'error'>(
-    'pending'
-  );
+  // Vehicle record, read through the CRUD cache: fetched during the server render
+  // (SSR), so the first HTML carries the vehicle. Never get(id) in a useEffect.
+  const {
+    data: vehicleData,
+    loading,
+    notFound,
+    error,
+  } = useCrudDoc(entity, id || null);
 
   // Fetch all vehicles for related items
   const { data: allVehiclesData } = useCrudCardList(entity, {
@@ -293,27 +292,6 @@ export function CarDetailTemplate({
     vehicleName,
   ]);
 
-  // Fetch vehicle data
-  useEffect(() => {
-    if (!id) {
-      setStatus('error');
-      return;
-    }
-    setStatus('pending');
-    get(id)
-      .then((data) => {
-        if (data) {
-          setVehicleData(data as Record<string, unknown>);
-          setStatus('success');
-        } else {
-          setStatus('error');
-        }
-      })
-      .catch(() => {
-        setStatus('error');
-      });
-  }, [id, get]);
-
   const canNativeShare = typeof navigator !== 'undefined' && !!navigator.share;
   const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -337,7 +315,7 @@ export function CarDetailTemplate({
       : null;
 
   // RENDER - conditional content, not early returns
-  if (status === 'pending') {
+  if (loading) {
     return (
       <PageContainer>
         <Spinner overlay />
@@ -345,7 +323,7 @@ export function CarDetailTemplate({
     );
   }
 
-  if (status === 'error' || !vehicleData) {
+  if (notFound || error || !vehicleData) {
     return (
       <PageContainer>
         <Stack
