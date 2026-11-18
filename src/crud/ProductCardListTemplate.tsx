@@ -368,7 +368,7 @@ export function ProductCardListTemplate({
           <Stack
             align="center"
             justify="center"
-            style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+            style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--destructive)' }}>
               {t('crud:errors.fetchFailed', {
@@ -385,7 +385,7 @@ export function ProductCardListTemplate({
           <Stack
             align="center"
             justify="center"
-            style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+            style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--muted-foreground)' }}>
               {t('crud:emptyState.title', {
@@ -490,7 +490,7 @@ export function ProductCardListTemplate({
                         <Text
                           level="small"
                           variant="muted"
-                          style={{ marginTop: 'var(--gap-xs)' }}
+                          style={{ marginTop: 'var(--gap-sm)' }}
                         >
                           {subtitle}
                         </Text>
@@ -526,7 +526,7 @@ export function ProductCardListTemplate({
                         style={{
                           display: 'flex',
                           flexWrap: 'wrap',
-                          gap: 'var(--gap-xs)',
+                          gap: 'var(--gap-sm)',
                         }}
                       >
                         {resolvedSpecsFields.map((fieldName) => {
@@ -553,8 +553,8 @@ export function ProductCardListTemplate({
                               style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: 'var(--gap-xs)',
-                                padding: 'var(--gap-xs) var(--gap-sm)',
+                                gap: 'var(--gap-sm)',
+                                padding: 'var(--gap-sm) var(--gap-sm)',
                                 background: 'var(--muted)',
                                 borderRadius: 'var(--radius-full)',
                                 fontSize: 'var(--font-size-sm)',
@@ -601,7 +601,7 @@ export function ProductCardListTemplate({
                       insetInlineStart: 'var(--gap-sm)',
                       zIndex: 10,
                       cursor: 'pointer',
-                      padding: 'var(--gap-xs)',
+                      padding: 'var(--gap-sm)',
                       borderRadius: 'var(--radius-full)',
                       backgroundColor: 'rgba(255, 255, 255, 0.9)',
                       backdropFilter: 'blur(4px)',

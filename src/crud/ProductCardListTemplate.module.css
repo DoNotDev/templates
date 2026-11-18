@@ -28,13 +28,13 @@
 .productSpecs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap-xs);
+  gap: var(--gap-sm);
 }
 .productSpecPill {
   display: inline-flex;
   align-items: center;
-  gap: var(--gap-xs);
-  padding: var(--gap-xs) var(--gap-sm);
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-sm);
   background: var(--muted);
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);

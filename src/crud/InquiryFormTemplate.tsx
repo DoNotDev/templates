@@ -26,7 +26,6 @@
 
 import { useState } from 'react';
 import type { ReactElement, FormEvent } from 'react';
-import type { FieldPath } from 'react-hook-form';
 
 import { Stack, Button, Card, Alert, Text } from '@donotdev/components';
 import {
@@ -35,10 +34,10 @@ import {
   createSchemas,
   useBreakpoint,
 } from '@donotdev/core';
-import type { AnyEntity, BulkAcrossBatch } from '@donotdev/core';
+import type { AnyEntity, BulkAcrossBatch, FormValues } from '@donotdev/core';
 import type { InferEntityData } from '@donotdev/crud';
 
-import { asPartialEntityData } from './asPartialEntityData';
+import { asPartialCreateInput } from './asPartialEntityData';
 import {
   isCrudModuleAvailable,
   useCrud,
@@ -141,16 +140,18 @@ export function InquiryFormTemplate<
         )
       : '';
 
-  const inquiryDefaultValues = asPartialEntityData<IE>({
+  const inquiryDefaultValues = asPartialCreateInput<IE>({
     [contextField]: contextId || undefined,
     date: new Date().toISOString(),
-    status: 'draft' as InferEntityData<IE>['status'],
+    status: 'draft',
     [messageField]: defaultMessage,
   });
 
   const inquiryForm = useEntityForm(inquiryEntity, {
     operation: 'create',
     defaultValues: inquiryDefaultValues,
+    // The form shows its own success state in place.
+    successPath: null,
   });
 
   // Use messagePlaceholder prop if provided, otherwise use entity's placeholder
@@ -158,15 +159,17 @@ export function InquiryFormTemplate<
   const effectivePlaceholder =
     messagePlaceholder || messageFieldConfig?.options?.placeholder;
 
-  const customerDefaultValues = asPartialEntityData<CE>({
-    type: 'Prospect' as InferEntityData<CE>['type'],
-    status: 'draft' as InferEntityData<CE>['status'],
-    [consentField]: false as InferEntityData<CE>[typeof consentField],
+  const customerDefaultValues = asPartialCreateInput<CE>({
+    type: 'Prospect',
+    status: 'draft',
+    [consentField]: false,
   });
 
   const customerForm = useEntityForm(customerEntity, {
     operation: 'create',
     defaultValues: customerDefaultValues,
+    // The form shows its own success state in place.
+    successPath: null,
   });
 
   const [status, setStatus] = useState<
@@ -177,20 +180,20 @@ export function InquiryFormTemplate<
   const customerSchemas = createSchemas(customerEntity);
   const inquirySchemas = createSchemas(inquiryEntity);
 
-  const handleSubmit = async (customerData: InferEntityData<CE>) => {
+  // Each form's handleSubmit output: the fields it writes on create (no id)
+  const handleSubmit = async (
+    customerData: FormValues<CE, 'create'>,
+    inquiryData: FormValues<IE, 'create'>
+  ) => {
     setStatus('loading');
     setErrorMessage('');
 
     try {
-      const { id: _omitCustomerId, ...customerCreate } = customerData;
-      void _omitCustomerId;
-
       // Pre-mint customer ID so the inquiry can reference it in the same batch.
       const customerId = generateUUID();
 
-      const messageValue = inquiryForm.getValues(
-        messageField as FieldPath<InferEntityData<IE>>
-      );
+      const inquiryValues: Readonly<Record<string, unknown>> = inquiryData;
+      const messageValue = inquiryValues[messageField as string];
       const inquiryMessage =
         typeof messageValue === 'string' ? messageValue.trim() : '';
 
@@ -203,12 +206,17 @@ export function InquiryFormTemplate<
         {
           collection: customerEntity.collection,
           inserts: [
-            { id: customerId, ...(customerCreate as Record<string, unknown>) },
+            // A prospect: a draft like the inquiry. `status` is editable by admins
+            // only, so the guest form does not write it.
+            {
+              id: customerId,
+              ...customerData,
+              status: 'draft',
+            },
           ],
           schemas: {
-            create:
-              customerSchemas.create as BulkAcrossBatch['schemas']['create'],
-            draft: customerSchemas.draft as BulkAcrossBatch['schemas']['draft'],
+            create: customerSchemas.create,
+            draft: customerSchemas.draft,
           },
         },
         {
@@ -223,9 +231,8 @@ export function InquiryFormTemplate<
             },
           ],
           schemas: {
-            create:
-              inquirySchemas.create as BulkAcrossBatch['schemas']['create'],
-            draft: inquirySchemas.draft as BulkAcrossBatch['schemas']['draft'],
+            create: inquirySchemas.create,
+            draft: inquirySchemas.draft,
           },
           dependsOn: [customerEntity.collection],
         },
@@ -274,9 +281,20 @@ export function InquiryFormTemplate<
 
   return (
     <form
-      onSubmit={(e: FormEvent) => {
+      onSubmit={async (e: FormEvent) => {
         e.preventDefault();
-        customerForm.handleSubmit(handleSubmit)(e);
+        // Validate both forms first so every error shows at once, then submit
+        // through each form's handleSubmit (validated, cleaned values).
+        const [customerValid, inquiryValid] = await Promise.all([
+          customerForm.trigger(),
+          inquiryForm.trigger(),
+        ]);
+        if (!customerValid || !inquiryValid) return;
+        await customerForm.handleSubmit((customerData) =>
+          inquiryForm.handleSubmit((inquiryData) =>
+            handleSubmit(customerData, inquiryData)
+          )()
+        )();
       }}
     >
       <Stack direction="column">

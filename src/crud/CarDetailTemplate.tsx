@@ -329,7 +329,7 @@ export function CarDetailTemplate({
         <Stack
           direction="column"
           gap="large"
-          style={{ padding: 'var(--gap-xl) 0', textAlign: 'center' }}
+          style={{ padding: 'var(--gap-lg) 0', textAlign: 'center' }}
         >
           <Text level="h2">{tPage('notFound', 'Vehicle not found')}</Text>
           <Link path="/">

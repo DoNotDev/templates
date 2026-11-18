@@ -279,7 +279,7 @@ export function CarCardListTemplate({
           <Stack
             align="center"
             justify="center"
-            style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+            style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--destructive)' }}>
               {tCrud('errors.fetchFailed', {
@@ -296,7 +296,7 @@ export function CarCardListTemplate({
           <Stack
             align="center"
             justify="center"
-            style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+            style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--muted-foreground)' }}>
               {tCrud('emptyState.title', {
@@ -456,7 +456,7 @@ export function CarCardListTemplate({
                         return (
                           <div
                             style={{
-                              marginTop: 'var(--gap-xs)',
+                              marginTop: 'var(--gap-sm)',
                               textAlign: 'end',
                             }}
                           >
@@ -585,7 +585,7 @@ export function CarCardListTemplate({
                       insetInlineEnd: 'var(--gap-sm)',
                       zIndex: 10,
                       cursor: 'pointer',
-                      padding: 'var(--gap-xs)',
+                      padding: 'var(--gap-sm)',
                       borderRadius: 'var(--radius-full)',
                       backgroundColor: 'transparent',
                       display: 'flex',

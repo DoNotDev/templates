@@ -197,7 +197,7 @@ export function InquiryAdminTemplate<
         <Stack
           align="center"
           justify="center"
-          style={{ padding: 'var(--gap-3xl)', textAlign: 'center' }}
+          style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
         >
           <Text level="h3" style={{ color: 'var(--destructive)' }}>
             {tCrud('errors.fetchFailed', {
