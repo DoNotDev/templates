@@ -1,5 +1,11 @@
 # @donotdev/templates
 
+## Unreleased
+
+### Patch Changes
+
+- `PrivacyPolicyTemplate`: when the app sets only strictly necessary cookies (see `isCookieNoticeRequired` in `@donotdev/core`), the cookies section says so and lists the cookies the framework sets (preferences, sign-in session when auth is on, payment when billing is on) instead of the analytics / functional / marketing list. New keys `sections.cookies.necessaryOnlyIntro` and `sections.cookies.necessary.*` in all `privacy_*` locales.
+
 ## 0.1.45
 
 ### Patch Changes

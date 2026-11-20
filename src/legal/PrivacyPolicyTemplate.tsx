@@ -13,7 +13,13 @@
 import type { ComponentType, ReactNode } from 'react';
 
 import { List, Section, Stack } from '@donotdev/components';
-import { useTranslation, formatDate } from '@donotdev/core';
+import {
+  useAppConfig,
+  useTranslation,
+  formatDate,
+  isCookieNoticeRequired,
+  isFeatureAvailable,
+} from '@donotdev/core';
 
 /**
  * Privacy Policy Template Configuration
@@ -84,6 +90,13 @@ export const PrivacyPolicyTemplate: ComponentType<PrivacyPolicyConfig> = ({
 }) => {
   const { t, i18n } = useTranslation('privacy');
   const formattedDate = formatDate(lastUpdated, i18n?.language || 'en');
+  // Only strictly necessary cookies: the section says so and lists what is set
+  // (no consent banner is shown in that case).
+  const necessaryCookiesOnly = !isCookieNoticeRequired(
+    useAppConfig().features?.requiredCookies
+  );
+  const hasSession = isFeatureAvailable('auth') || isFeatureAvailable('oauth');
+  const hasPayment = isFeatureAvailable('billing');
 
   return (
     <Section tone={tone} textAlign="start">
@@ -673,10 +686,15 @@ export const PrivacyPolicyTemplate: ComponentType<PrivacyPolicyConfig> = ({
             )}
           </h2>
           <p style={{ marginBottom: '1rem' }}>
-            {t(
-              'sections.cookies.intro',
-              'We use cookies and similar tracking technologies to enhance your experience, analyze usage, and provide personalized content. You can control cookie settings through your browser preferences.'
-            )}
+            {necessaryCookiesOnly
+              ? t(
+                  'sections.cookies.necessaryOnlyIntro',
+                  'This service only uses strictly necessary cookies. They are required for the service to work, are not used to track you, and do not require your consent.'
+                )
+              : t(
+                  'sections.cookies.intro',
+                  'We use cookies and similar tracking technologies to enhance your experience, analyze usage, and provide personalized content. You can control cookie settings through your browser preferences.'
+                )}
           </p>
 
           <h3
@@ -689,45 +707,85 @@ export const PrivacyPolicyTemplate: ComponentType<PrivacyPolicyConfig> = ({
             {t('sections.cookies.types.title', '8.1 Types of Cookies We Use')}
           </h3>
           <List
-            items={[
-              <>
-                <strong>
-                  {t('sections.cookies.types.essential', 'Essential Cookies')}:
-                </strong>{' '}
-                {t(
-                  'sections.cookies.types.essentialDesc',
-                  'Required for basic functionality and security'
-                )}
-              </>,
-              <>
-                <strong>
-                  {t('sections.cookies.types.analytics', 'Analytics Cookies')}:
-                </strong>{' '}
-                {t(
-                  'sections.cookies.types.analyticsDesc',
-                  'Help us understand how visitors use our platform'
-                )}
-              </>,
-              <>
-                <strong>
-                  {t('sections.cookies.types.functional', 'Functional Cookies')}
-                  :
-                </strong>{' '}
-                {t(
-                  'sections.cookies.types.functionalDesc',
-                  'Remember your preferences and settings'
-                )}
-              </>,
-              <>
-                <strong>
-                  {t('sections.cookies.types.marketing', 'Marketing Cookies')}:
-                </strong>{' '}
-                {t(
-                  'sections.cookies.types.marketingDesc',
-                  'Used for targeted advertising and content'
-                )}
-              </>,
-            ]}
+            items={
+              necessaryCookiesOnly
+                ? [
+                    t(
+                      'sections.cookies.necessary.preferences',
+                      'Preferences (language, light or dark display): remember the choices you make on this service.'
+                    ),
+                    ...(hasSession
+                      ? [
+                          t(
+                            'sections.cookies.necessary.session',
+                            'Sign-in session: keeps you signed in to your account.'
+                          ),
+                        ]
+                      : []),
+                    ...(hasPayment
+                      ? [
+                          t(
+                            'sections.cookies.necessary.payment',
+                            'Secure payment (Stripe): fraud prevention and checkout session.'
+                          ),
+                        ]
+                      : []),
+                  ]
+                : [
+                    <>
+                      <strong>
+                        {t(
+                          'sections.cookies.types.essential',
+                          'Essential Cookies'
+                        )}
+                        :
+                      </strong>{' '}
+                      {t(
+                        'sections.cookies.types.essentialDesc',
+                        'Required for basic functionality and security'
+                      )}
+                    </>,
+                    <>
+                      <strong>
+                        {t(
+                          'sections.cookies.types.analytics',
+                          'Analytics Cookies'
+                        )}
+                        :
+                      </strong>{' '}
+                      {t(
+                        'sections.cookies.types.analyticsDesc',
+                        'Help us understand how visitors use our platform'
+                      )}
+                    </>,
+                    <>
+                      <strong>
+                        {t(
+                          'sections.cookies.types.functional',
+                          'Functional Cookies'
+                        )}
+                        :
+                      </strong>{' '}
+                      {t(
+                        'sections.cookies.types.functionalDesc',
+                        'Remember your preferences and settings'
+                      )}
+                    </>,
+                    <>
+                      <strong>
+                        {t(
+                          'sections.cookies.types.marketing',
+                          'Marketing Cookies'
+                        )}
+                        :
+                      </strong>{' '}
+                      {t(
+                        'sections.cookies.types.marketingDesc',
+                        'Used for targeted advertising and content'
+                      )}
+                    </>,
+                  ]
+            }
             style={{
               paddingInlineStart: '1.5rem',
             }}
