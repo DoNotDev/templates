@@ -4,6 +4,7 @@
 
 ### Patch Changes
 
+- Blog `parseFrontmatter` (and the blog loader's post metadata) removes a value's surrounding quotes (`title: "Hello, world"` → `Hello, world`), the rules of `parseBlogFrontmatter` (`@donotdev/core`) that the build's rss.xml, llms.txt and prerendered pages use: the page title showed the quotes.
 - `PrivacyPolicyTemplate`: when the app sets only strictly necessary cookies (see `isCookieNoticeRequired` in `@donotdev/core`), the cookies section says so and lists the cookies the framework sets (preferences, sign-in session when auth is on, payment when billing is on) instead of the analytics / functional / marketing list. New keys `sections.cookies.necessaryOnlyIntro` and `sections.cookies.necessary.*` in all `privacy_*` locales.
 
 ## 0.1.45

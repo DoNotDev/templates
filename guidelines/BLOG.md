@@ -216,9 +216,9 @@ const filtered = blog.getPostsByTag('react'); // Posts tagged 'react'
 
 ### Build-time generation
 
-The SEO pipeline (Vite `SEOPlugin` / Next.js `SEOHandler`) automatically:
+The build automatically:
 
-1. Discovers `src/content/blog/*_en.md` files
+1. Discovers `src/content/blog/*_en.md` files, read once per build (Vite: the route plugin, which hands the posts to `SEOPlugin` and the prerender through the route manifest; Next.js: `SEOHandler`)
 2. Appends blog post URLs to `sitemap.xml`
 3. Generates `rss.xml` (RSS 2.0 with Atom self-link) with all posts
 

@@ -1,6 +1,7 @@
 // packages/templates/src/blog/blog-loader.ts
 /// <reference path="./virtual.d.ts" />
 import blogContent from '@donotdev/blog-content';
+import { parseBlogFrontmatter } from '@donotdev/core';
 
 /**
  * @fileoverview Blog data loader utilities
@@ -126,7 +127,9 @@ function parseTags(tagsStr?: string): string[] {
 }
 
 /**
- * Parse frontmatter from raw markdown string.
+ * Parse frontmatter from raw markdown string: `parseBlogFrontmatter` (`@donotdev/core`, the
+ * rules the build and the Next blog pages use: a value's surrounding quotes removed), with
+ * empty `title`, `description` and `date` when the post has none.
  * Expects `---\nkey: value\n---\ncontent` format.
  *
  * @param raw - Raw markdown file content including frontmatter
@@ -142,25 +145,8 @@ export function parseFrontmatter(raw: string): {
   meta: BlogMeta;
   content: string;
 } {
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
-  if (!match) {
-    return {
-      meta: { title: '', description: '', date: '' },
-      content: raw,
-    };
-  }
-
-  const meta: BlogMeta = { title: '', description: '', date: '' };
-  const frontmatter = match[1] ?? '';
-  for (const line of frontmatter.split('\n')) {
-    const colonIndex = line.indexOf(':');
-    if (colonIndex === -1) continue;
-    const key = line.slice(0, colonIndex).trim();
-    const value = line.slice(colonIndex + 1).trim();
-    if (key) meta[key] = value;
-  }
-
-  return { meta, content: match[2] ?? '' };
+  const { meta, content } = parseBlogFrontmatter(raw);
+  return { meta: { title: '', description: '', date: '', ...meta }, content };
 }
 
 /**
