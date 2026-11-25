@@ -28,7 +28,10 @@ import {
   Stack,
   Grid,
 } from '@donotdev/components';
-import { useTranslation } from '@donotdev/core';
+import { formatDate, useTranslation } from '@donotdev/core';
+
+/** Numeric date (the `toLocaleDateString()` layout), in the app's zone (`formatDate`). */
+const NUMERIC_DATE = { year: 'numeric', month: 'numeric', day: 'numeric' } as const;
 
 // Using emojis instead of Lucide icons for modern conventions
 
@@ -96,7 +99,7 @@ export function WhatsNewTemplate({
   maxEntries,
   onVersionSelect,
 }: WhatsNewTemplateProps) {
-  const { t } = useTranslation('whatsNew');
+  const { t, language } = useTranslation('whatsNew');
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
 
   const filteredChangelog = useMemo(
@@ -271,7 +274,7 @@ export function WhatsNewTemplate({
                         color: 'var(--muted-foreground)',
                       }}
                     >
-                      📅 {new Date(entry.date).toLocaleDateString()}
+                      📅 {formatDate(entry.date, language, NUMERIC_DATE)}
                     </Stack>
                     <div
                       style={{
@@ -338,7 +341,7 @@ export function WhatsNewTemplate({
                         </span>
                       </Stack>
                       <Stack direction="row" align="center" gap="tight">
-                        📅 {new Date(selectedEntry.date).toLocaleDateString()}
+                        📅 {formatDate(selectedEntry.date, language, NUMERIC_DATE)}
                       </Stack>
                     </Stack>
                   </div>

@@ -96,7 +96,7 @@ export function InquiryAdminTemplate<
   const { t: tInquiry } = useTranslation(
     `entity-${inquiryEntity.name.toLowerCase()}`
   );
-  const { t: tCrud } = useTranslation('crud');
+  const { t: tCrud, language } = useTranslation('crud');
 
   const sectionTitle = title || tInquiry('name');
 
@@ -267,7 +267,7 @@ export function InquiryAdminTemplate<
                   </Badge>
                   {inquiryDate && (
                     <Text variant="muted" level="small">
-                      {formatDate(inquiryDate)}
+                      {formatDate(inquiryDate, language)}
                     </Text>
                   )}
                 </Stack>

@@ -360,7 +360,7 @@ export function CarDetailTemplate({
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: 'var(--muted)',
-                  borderRadius: 'var(--radius-lg)',
+                  borderRadius: 'var(--radius-surface)',
                 }}
               >
                 <Text variant="muted">{tPage('noImages', 'No images')}</Text>

@@ -26,7 +26,7 @@ import {
   Stack,
   Grid,
 } from '@donotdev/components';
-import { useTranslation } from '@donotdev/core';
+import { formatDate, useTranslation } from '@donotdev/core';
 import {
   PageContainer,
   Link,
@@ -34,6 +34,9 @@ import {
   useBillingVisibility,
   FeatureDisabled,
 } from '@donotdev/ui';
+
+/** Numeric date (the `toLocaleDateString()` layout), in the app's zone (`formatDate`). */
+const NUMERIC_DATE = { year: 'numeric', month: 'numeric', day: 'numeric' } as const;
 
 /** Props for the BillingSuccessTemplate component. */
 export interface BillingSuccessTemplateProps {
@@ -67,7 +70,7 @@ export function BillingSuccessTemplate({
   supportEmail = 'support@example.com',
 }: BillingSuccessTemplateProps) {
   const { shouldHide } = useBillingVisibility();
-  const { t } = useTranslation([namespace, 'billing']);
+  const { t, language } = useTranslation([namespace, 'billing']);
   const userSubscription = useAuthSafe('userSubscription');
 
   if (shouldHide) {
@@ -198,7 +201,7 @@ export function BillingSuccessTemplate({
                         if (isNaN(date.getTime())) {
                           return t('billing:templates.success.dateUnavailable');
                         }
-                        return date.toLocaleDateString();
+                        return formatDate(date, language, NUMERIC_DATE);
                       })()}
                     </p>
                   </div>
