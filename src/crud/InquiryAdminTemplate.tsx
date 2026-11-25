@@ -200,9 +200,7 @@ export function InquiryAdminTemplate<
           style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
         >
           <Text level="h3" style={{ color: 'var(--destructive)' }}>
-            {tCrud('errors.fetchFailed', {
-              defaultValue: 'Failed to load inquiries',
-            })}
+            {tCrud('errors.fetchFailed', { entity: tInquiry('name') })}
           </Text>
           <Text level="small" style={{ color: 'var(--destructive)' }}>
             {fetchError instanceof Error
@@ -211,9 +209,7 @@ export function InquiryAdminTemplate<
           </Text>
         </Stack>
       ) : sortedInquiries.length === 0 ? (
-        <Text variant="muted">
-          {tCrud('noInquiries', { defaultValue: 'No inquiries found.' })}
-        </Text>
+        <Text variant="muted">{tCrud('noInquiries')}</Text>
       ) : (
         <Grid cols={[1, 1, 2, 2]}>
           {sortedInquiries.map((inquiry) => {
@@ -282,8 +278,7 @@ export function InquiryAdminTemplate<
                     <Stack direction="row" gap="tight" align="center">
                       <User size={14} />
                       <Text weight="medium" level="small">
-                        {fullName ||
-                          tCrud('customer', { defaultValue: 'Customer' })}
+                        {fullName || tCrud('customer')}
                       </Text>
                     </Stack>
                     {customerEmail && (
@@ -299,9 +294,7 @@ export function InquiryAdminTemplate<
                   </Stack>
                 ) : (
                   <Text variant="muted" level="small">
-                    {tCrud('noCustomer', {
-                      defaultValue: 'No customer linked',
-                    })}
+                    {tCrud('noCustomer')}
                   </Text>
                 )}
 
@@ -323,7 +316,7 @@ export function InquiryAdminTemplate<
                               path={`mailto:${encodeURIComponent(customerEmail)}${(() => {
                                 const ctx = inquiry[contextField];
                                 return typeof ctx === 'string' && ctx
-                                  ? `?subject=${encodeURIComponent(tCrud('actions.replySubject', { defaultValue: 'Re: Your inquiry' }))}`
+                                  ? `?subject=${encodeURIComponent(tCrud('actions.replySubject'))}`
                                   : '';
                               })()}`}
                               className={className}
@@ -334,7 +327,7 @@ export function InquiryAdminTemplate<
                             </Link>
                           )}
                         >
-                          {tCrud('actions.email', { defaultValue: 'Email' })}
+                          {tCrud('actions.email')}
                         </Button>
                       )}
                       {customerPhone && (
@@ -354,7 +347,7 @@ export function InquiryAdminTemplate<
                             </Link>
                           )}
                         >
-                          {tCrud('actions.call', { defaultValue: 'Call' })}
+                          {tCrud('actions.call')}
                         </Button>
                       )}
                     </Stack>
@@ -370,9 +363,7 @@ export function InquiryAdminTemplate<
                         handleMarkResponded(inquiry.id);
                       }}
                     >
-                      {tCrud('actions.markResponded', {
-                        defaultValue: 'Mark responded',
-                      })}
+                      {tCrud('actions.markResponded')}
                     </Button>
                   )}
                 </Stack>

@@ -78,10 +78,7 @@ export function PaymentTemplate({
         <FeatureDisabled
           featureName="Billing"
           title={displayTitle}
-          description={t(
-            'billing:templates.purchase.notAvailable',
-            'Stripe billing is not configured or available. Please contact support if you believe this is an error.'
-          )}
+          description={t('billing:templates.purchase.notAvailable')}
           showContactSupport={true}
           showRetry={true}
           onRetry={() => {
@@ -96,9 +93,7 @@ export function PaymentTemplate({
     return (
       <PageContainer variant="standard">
         <Stack align="center">
-          <Text variant="muted">
-            {t('billing:templates.purchase.loading', 'Loading billing...')}
-          </Text>
+          <Text variant="muted">{t('billing:templates.purchase.loading')}</Text>
         </Stack>
       </PageContainer>
     );

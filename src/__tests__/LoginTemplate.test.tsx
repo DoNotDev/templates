@@ -63,15 +63,15 @@ describe('LoginTemplate', () => {
   it('shows a spinner, not an error, while auth initializes', () => {
     state.visibility = { shouldHide: true, isLoading: true, isReady: false, isAuthenticated: false };
     const out = html();
-    expect(out).toContain('SPINNER:login.loading');
+    expect(out).toContain('SPINNER:templates.login.loading');
     expect(out).not.toContain('ALERT');
   });
 
   it('explains when auth is disabled or not installed', () => {
     state.visibility = { shouldHide: true, isLoading: false, isReady: false, isAuthenticated: false };
-    expect(html()).toContain('ALERT:login.authNotAvailable');
+    expect(html()).toContain('ALERT:templates.login.authNotAvailable');
     state.available = false;
-    expect(html()).toContain('ALERT:login.authNotAvailable');
+    expect(html()).toContain('ALERT:templates.login.authNotAvailable');
   });
 
   describe('signed in', () => {

@@ -228,7 +228,6 @@ export function CarCardListTemplate({
         <Section
           title={tCrud('filters.title', {
             entity: entityName,
-            defaultValue: `Browse ${entityName} - Filters`,
           })}
           collapsible
           defaultOpen={true}
@@ -241,10 +240,8 @@ export function CarCardListTemplate({
               onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
             >
               {showFavoritesOnly
-                ? tCrud('favorites.showAll', { defaultValue: 'Show All' })
-                : tCrud('favorites.showFavorites', {
-                    defaultValue: 'Show Favorites',
-                  })}
+                ? tCrud('favorites.showAll')
+                : tCrud('favorites.showFavorites')}
             </Button>
 
             <EntityFilters
@@ -282,9 +279,7 @@ export function CarCardListTemplate({
             style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--destructive)' }}>
-              {tCrud('errors.fetchFailed', {
-                defaultValue: `Failed to load ${entity.name.toLowerCase()}`,
-              })}
+              {tCrud('errors.fetchFailed', { entity: entityName })}
             </Text>
             <Text level="small" style={{ color: 'var(--destructive)' }}>
               {fetchError instanceof Error
@@ -299,14 +294,10 @@ export function CarCardListTemplate({
             style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--muted-foreground)' }}>
-              {tCrud('emptyState.title', {
-                defaultValue: `No ${entity.name.toLowerCase()} found`,
-              })}
+              {tCrud('emptyState.title', { entity: entityName })}
             </Text>
             <Text style={{ color: 'var(--muted-foreground)' }}>
-              {tCrud('emptyState.description', {
-                defaultValue: `No ${entity.name.toLowerCase()} available at this time.`,
-              })}
+              {tCrud('emptyState.description', { entity: entityName })}
             </Text>
           </Stack>
         ) : (
@@ -353,7 +344,7 @@ export function CarCardListTemplate({
                 typeof soldLabelFormatted === 'string' &&
                 soldLabelFormatted.length > 0
                   ? soldLabelFormatted
-                  : tCrud('status.sold', { defaultValue: 'Sold' });
+                  : tCrud('status.sold');
 
               const itemIsFavorite = isFavorite(item.id as string);
 
@@ -595,12 +586,8 @@ export function CarCardListTemplate({
                     }}
                     aria-label={
                       itemIsFavorite
-                        ? tCrud('favorites.remove', {
-                            defaultValue: 'Remove from favorites',
-                          })
-                        : tCrud('favorites.add', {
-                            defaultValue: 'Add to favorites',
-                          })
+                        ? tCrud('favorites.remove')
+                        : tCrud('favorites.add')
                     }
                   >
                     <Heart
@@ -626,15 +613,9 @@ export function CarCardListTemplate({
           <Section
             title={
               loading
-                ? tCrud('results.title.fetching', {
-                    defaultValue: 'Fetching...',
-                  })
+                ? tCrud('results.title.fetching')
                 : tCrud('results.title.count', {
                     count: data.length,
-                    defaultValue:
-                      data.length === 1
-                        ? 'Found 1 item'
-                        : `Found ${data.length} items`,
                   })
             }
             collapsible

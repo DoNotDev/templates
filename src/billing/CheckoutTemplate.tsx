@@ -88,10 +88,7 @@ export function CheckoutPageTemplate({
       <FeatureDisabled
         featureName="Checkout"
         title={title || t('templates.checkout.title')}
-        description={t(
-          'templates.checkout.notAvailable',
-          'Stripe billing is not configured or available. Please contact support if you believe this is an error.'
-        )}
+        description={t('templates.checkout.notAvailable')}
         showContactSupport={true}
         showRetry={true}
         onRetry={() => {
@@ -109,7 +106,7 @@ export function CheckoutPageTemplate({
           style={{ paddingTop: 'var(--gap-lg)' }}
         >
           <p style={{ color: 'var(--muted-foreground)' }}>
-            {t('templates.checkout.loading', 'Loading checkout...')}
+            {t('templates.checkout.loading')}
           </p>
         </div>
       </Card>
@@ -165,10 +162,7 @@ export function CheckoutPageTemplate({
           ) : (
             <div className="dndev-text-center">
               <p style={{ color: 'var(--muted-foreground)' }}>
-                {t(
-                  'templates.checkout.noPriceId',
-                  'No product selected. Please choose a product before proceeding to checkout.'
-                )}
+                {t('templates.checkout.noPriceId')}
               </p>
             </div>
           )}

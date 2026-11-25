@@ -5,15 +5,16 @@
  * @fileoverview Legal Notice Template Component
  * @description Reusable legal notice (Mentions Légales) template with configurable company details and i18n support
  *
- * @version 0.1.0
+ * @version 0.2.0
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 
 import { Text, Section, Stack } from '@donotdev/components';
 import { useTranslation, formatDate } from '@donotdev/core';
+import { Link } from '@donotdev/ui';
 
 /**
  * Legal Notice Template Configuration
@@ -59,6 +60,27 @@ export interface LegalNoticeConfig {
   tone?: 'ghost' | 'base' | 'muted' | 'contrast' | 'accent';
 }
 
+/** Section block: h2 heading plus its content, tight vertical rhythm. */
+function Block({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <Stack gap="tight">
+      <Text as="h2" level="h3">
+        {title}
+      </Text>
+      {children}
+    </Stack>
+  );
+}
+
+/** Paragraph with a bold label prefix. */
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Text as="p">
+      <Text as="strong">{label}:</Text> {children}
+    </Text>
+  );
+}
+
 /**
  * Legal Notice Template Component
  *
@@ -71,7 +93,7 @@ export interface LegalNoticeConfig {
  *
  * @param props - LegalNoticeTemplate component props
  * @returns React component
- * @version 0.1.0
+ * @version 0.2.0
  * @since 0.0.1
  * @author AMBROISE PARK Consulting
  */
@@ -103,310 +125,112 @@ export const LegalNoticeTemplate: ComponentType<LegalNoticeConfig> = ({
 
   return (
     <Section tone={tone} textAlign="start">
-      <div className="dndev-text-center" style={{ marginBottom: '3rem' }}>
-        <h1
-          style={{
-            fontSize: 'var(--font-size-3xl)',
-            fontWeight: 700,
-            marginBottom: '1rem',
-          }}
-        >
-          ⚖️ {t('title', 'Legal Notice')}
-        </h1>
-        <p
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            color: 'var(--muted-foreground)',
-          }}
-        >
-          {t('lastUpdated', 'Last updated')}: {formattedDate}
-        </p>
-      </div>
-
       <Stack gap="large">
+        <Stack gap="tight">
+          <Text as="h1">{t('title')}</Text>
+          <Text variant="muted">
+            {t('lastUpdated')}: {formattedDate}
+          </Text>
+        </Stack>
+
         {/* Publisher Information */}
-        <section>
-          <h2
-            style={{
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 600,
-              marginBottom: '1rem',
-            }}
-          >
-            {t('publisher.title', '1. Publisher Information')}
-          </h2>
-          <Stack gap="tight">
-            <p>
-              <strong>{t('publisher.name', 'Publisher name')}:</strong>{' '}
-              {publisherName}
-            </p>
-            <p>
-              <strong>{t('publisher.type', 'Type')}:</strong>{' '}
-              {t(
-                `publisher.types.${publisherType}`,
-                publisherType === 'company' ? 'Company' : 'Individual'
-              )}
-            </p>
-            {legalStatus && (
-              <p>
-                <strong>{t('publisher.legalStatus', 'Legal status')}:</strong>{' '}
-                {legalStatus}
-              </p>
-            )}
-            {shareCapital && publisherType === 'company' && (
-              <p>
-                <strong>{t('publisher.shareCapital', 'Share capital')}:</strong>{' '}
-                {shareCapital}
-              </p>
-            )}
-          </Stack>
-        </section>
+        <Block title={t('publisher.title')}>
+          <Field label={t('publisher.name')}>{publisherName}</Field>
+          <Field label={t('publisher.type')}>
+            {t(`publisher.types.${publisherType}`)}
+          </Field>
+          {legalStatus && (
+            <Field label={t('publisher.legalStatus')}>{legalStatus}</Field>
+          )}
+          {shareCapital && publisherType === 'company' && (
+            <Field label={t('publisher.shareCapital')}>{shareCapital}</Field>
+          )}
+        </Block>
 
         {/* Registration Details */}
         {(registrationNumber || vatNumber) && (
-          <section>
-            <h2
-              style={{
-                fontSize: 'var(--font-size-xl)',
-                fontWeight: 600,
-                marginBottom: '1rem',
-              }}
-            >
-              {t('registration.title', '2. Registration Details')}
-            </h2>
-            <Stack gap="tight">
-              {registrationNumber && (
-                <p>
-                  <strong>
-                    {t('registration.number', 'Registration number / SIRET')}:
-                  </strong>{' '}
-                  {registrationNumber}
-                </p>
-              )}
-              {vatNumber && (
-                <p>
-                  <strong>{t('registration.vat', 'VAT number')}:</strong>{' '}
-                  {vatNumber}
-                </p>
-              )}
-            </Stack>
-          </section>
+          <Block title={t('registration.title')}>
+            {registrationNumber && (
+              <Field label={t('registration.number')}>
+                {registrationNumber}
+              </Field>
+            )}
+            {vatNumber && (
+              <Field label={t('registration.vat')}>{vatNumber}</Field>
+            )}
+          </Block>
         )}
 
         {/* Registered Office */}
-        <section>
-          <h2
-            style={{
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 600,
-              marginBottom: '1rem',
-            }}
-          >
-            {t('office.title', '3. Registered Office')}
-          </h2>
-          <p>
-            <strong>{t('office.address', 'Address')}:</strong>
-            <br />
-            {registeredOffice}
-          </p>
-        </section>
+        <Block title={t('office.title')}>
+          <Field label={t('office.address')}>{registeredOffice}</Field>
+        </Block>
 
         {/* Contact Information */}
-        <section>
-          <h2
-            style={{
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 600,
-              marginBottom: '1rem',
-            }}
-          >
-            {t('contact.title', '4. Contact Information')}
-          </h2>
-          <Stack gap="tight">
-            <p>
-              <strong>{t('contact.email', 'Email')}:</strong>{' '}
-              <a href={`mailto:${email}`} style={{ color: 'var(--primary)' }}>
-                {' '}
-                {email}
-              </a>
-            </p>
-            {phone && (
-              <p>
-                <strong>{t('contact.phone', 'Phone')}:</strong>{' '}
-                <a href={`tel:${phone}`} style={{ color: 'var(--primary)' }}>
-                  {phone}
-                </a>
-              </p>
-            )}
-          </Stack>
-        </section>
+        <Block title={t('contact.title')}>
+          <Field label={t('contact.email')}>
+            <Link path={`mailto:${email}`}>{email}</Link>
+          </Field>
+          {phone && (
+            <Field label={t('contact.phone')}>
+              <Link path={`tel:${phone}`}>{phone}</Link>
+            </Field>
+          )}
+        </Block>
 
         {/* Publication Director */}
-        <section>
-          <h2
-            style={{
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 600,
-              marginBottom: '1rem',
-            }}
-          >
-            {t('director.title', '5. Publication Director')}
-          </h2>
-          <Stack gap="tight">
-            <p>
-              <strong>{t('director.name', 'Name')}:</strong> {directorName}
-            </p>
-            {directorRole && (
-              <p>
-                <strong>{t('director.role', 'Role')}:</strong> {directorRole}
-              </p>
-            )}
-          </Stack>
-        </section>
+        <Block title={t('director.title')}>
+          <Field label={t('director.name')}>{directorName}</Field>
+          {directorRole && (
+            <Field label={t('director.role')}>{directorRole}</Field>
+          )}
+        </Block>
 
         {/* Hosting Provider */}
-        <section>
-          <h2
-            style={{
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 600,
-              marginBottom: '1rem',
-            }}
-          >
-            {t('hosting.title', '6. Hosting Provider')}
-          </h2>
-          <Stack gap="tight">
-            <p>
-              <strong>{t('hosting.provider', 'Provider')}:</strong>{' '}
-              {hostingProvider}
-            </p>{' '}
-            {hostingAddress && (
-              <p>
-                <strong>{t('hosting.address', 'Address')}:</strong>
-                <br />
-                {hostingAddress}
-              </p>
-            )}
-            {hostingContact && (
-              <p>
-                <strong>{t('hosting.contact', 'Contact')}:</strong>{' '}
-                {hostingContact}
-              </p>
-            )}
-          </Stack>
-        </section>
+        <Block title={t('hosting.title')}>
+          <Field label={t('hosting.provider')}>{hostingProvider}</Field>
+          {hostingAddress && (
+            <Field label={t('hosting.address')}>{hostingAddress}</Field>
+          )}
+          {hostingContact && (
+            <Field label={t('hosting.contact')}>{hostingContact}</Field>
+          )}
+        </Block>
 
         {/* Intellectual Property (Optional) */}
         {sections.intellectualProperty && (
-          <section>
-            <h2
-              style={{
-                fontSize: 'var(--font-size-xl)',
-                fontWeight: 600,
-                marginBottom: '1rem',
-              }}
-            >
-              {t('intellectualProperty.title', '7. Intellectual Property')}
-            </h2>
-            <p>
-              {t(
-                'intellectualProperty.content',
-                'All content on this website, including but not limited to text, graphics, logos, images, audio clips, digital downloads, data compilations, and software, is the property of {publisherName} or its content suppliers and is protected by international copyright laws.',
-                { publisherName }
-              )}
-            </p>
-            <p style={{ marginTop: '1rem' }}>
-              {t(
-                'intellectualProperty.unauthorized',
-                'The unauthorized use of any content from this website may violate copyright, trademark, and other laws.'
-              )}
-            </p>
-          </section>
+          <Block title={t('intellectualProperty.title')}>
+            <Text as="p">
+              {t('intellectualProperty.content', { publisherName })}
+            </Text>
+            <Text as="p">{t('intellectualProperty.unauthorized')}</Text>
+          </Block>
         )}
 
         {/* Personal Data (Optional) */}
         {sections.personalData && (
-          <section>
-            <h2
-              style={{
-                fontSize: 'var(--font-size-xl)',
-                fontWeight: 600,
-                marginBottom: '1rem',
-              }}
-            >
-              {t('personalData.title', '8. Personal Data')}
-            </h2>
-            <p>
-              {t(
-                'personalData.content',
-                'For information about how we collect, use, and protect your personal data, please refer to our '
-              )}
-              <a
-                href="/privacy"
-                style={{
-                  color: 'var(--primary)',
-                  textDecoration: 'underline',
-                }}
-              >
-                {t('personalData.privacyPolicy', 'Privacy Policy')}
-              </a>
-              .
-            </p>
-          </section>
+          <Block title={t('personalData.title')}>
+            <Text as="p">
+              {t('personalData.content')}
+              <Link path="/privacy">{t('personalData.privacyPolicy')}</Link>.
+            </Text>
+          </Block>
         )}
 
         {/* Cookies (Optional) */}
         {sections.cookies && (
-          <section>
-            <h2
-              style={{
-                fontSize: 'var(--font-size-xl)',
-                fontWeight: 600,
-                marginBottom: '1rem',
-              }}
-            >
-              {t('cookies.title', '9. Cookies')}
-            </h2>
-            <p>
-              {t(
-                'cookies.content',
-                'This website uses cookies. For detailed information about cookies and how we use them, please refer to our '
-              )}
-              <a
-                href="/privacy"
-                style={{
-                  color: 'var(--primary)',
-                  textDecoration: 'underline',
-                }}
-              >
-                {t('cookies.privacyPolicy', 'Privacy Policy')}
-              </a>
-              .
-            </p>
-          </section>
+          <Block title={t('cookies.title')}>
+            <Text as="p">
+              {t('cookies.content')}
+              <Link path="/privacy">{t('cookies.privacyPolicy')}</Link>.
+            </Text>
+          </Block>
         )}
-      </Stack>
 
-      <div
-        className="dndev-text-center"
-        style={{
-          marginTop: '3rem',
-          paddingTop: '2rem',
-          borderTop: '1px solid var(--border)',
-        }}
-      >
-        <Text variant="muted" level="small">
-          {t(
-            'footer.accurate',
-            'The information in this Legal Notice is accurate as of'
-          )}{' '}
-          {formattedDate}{' '}
-          {t(
-            'footer.updated',
-            'and may be updated to reflect changes in our company information.'
-          )}
+        <Text as="p" variant="muted" level="small">
+          {t('footer.accurate')} {formattedDate} {t('footer.updated')}
         </Text>
-      </div>
+      </Stack>
     </Section>
   );
 };

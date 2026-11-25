@@ -75,13 +75,8 @@ export function BillingSuccessTemplate({
       <PageContainer variant="docs">
         <FeatureDisabled
           featureName="Billing Success"
-          title={
-            title || t('billing:templates.success.title', 'Payment Successful!')
-          }
-          description={t(
-            'billing:templates.success.notAvailable',
-            'Billing is not configured or available. Please contact support if you believe this is an error.'
-          )}
+          title={title || t('billing:templates.success.title')}
+          description={t('billing:templates.success.notAvailable')}
           showContactSupport={true}
           supportEmail={supportEmail}
         />
@@ -130,8 +125,7 @@ export function BillingSuccessTemplate({
               marginBottom: 'var(--gap-md)',
             }}
           >
-            {title ||
-              t('billing:templates.success.title', 'Payment Successful!')}
+            {title || t('billing:templates.success.title')}
           </h1>
           <p
             style={{
@@ -139,11 +133,7 @@ export function BillingSuccessTemplate({
               color: 'var(--muted-foreground)',
             }}
           >
-            {subtitle ||
-              t(
-                'billing:templates.success.subtitle',
-                'Thank you for your purchase'
-              )}
+            {subtitle || t('billing:templates.success.subtitle')}
           </p>
         </div>
 
@@ -158,10 +148,7 @@ export function BillingSuccessTemplate({
                   marginBottom: 'var(--gap-md)',
                 }}
               >
-                {t(
-                  'billing:templates.success.subscriptionDetails',
-                  'Subscription Details'
-                )}
+                {t('billing:templates.success.subscriptionDetails')}
               </h2>
               <Stack>
                 <Grid cols={2} className="dndev-grid-responsive-1-2">
@@ -172,7 +159,7 @@ export function BillingSuccessTemplate({
                         color: 'var(--muted-foreground)',
                       }}
                     >
-                      {t('billing:templates.success.plan', 'Plan')}
+                      {t('billing:templates.success.plan')}
                     </p>
                     <p style={{ fontWeight: 600, textTransform: 'capitalize' }}>
                       {subscription.tier}
@@ -185,7 +172,7 @@ export function BillingSuccessTemplate({
                         color: 'var(--muted-foreground)',
                       }}
                     >
-                      {t('billing:templates.success.status', 'Status')}
+                      {t('billing:templates.success.status')}
                     </p>
                     <p style={{ fontWeight: 600, textTransform: 'capitalize' }}>
                       {subscription.status}
@@ -199,26 +186,17 @@ export function BillingSuccessTemplate({
                       }}
                     >
                       {subscription.status === 'active'
-                        ? t(
-                            'billing:templates.success.validUntil',
-                            'Valid Until'
-                          )
-                        : t('billing:templates.success.endedOn', 'Ended On')}
+                        ? t('billing:templates.success.validUntil')
+                        : t('billing:templates.success.endedOn')}
                     </p>
                     <p style={{ fontWeight: 600 }}>
                       {(() => {
                         if (subscription.subscriptionEnd == null) {
-                          return t(
-                            'billing:templates.success.lifetime',
-                            'Lifetime'
-                          );
+                          return t('billing:templates.success.lifetime');
                         }
                         const date = new Date(subscription.subscriptionEnd);
                         if (isNaN(date.getTime())) {
-                          return t(
-                            'billing:templates.success.dateUnavailable',
-                            'Date unavailable'
-                          );
+                          return t('billing:templates.success.dateUnavailable');
                         }
                         return date.toLocaleDateString();
                       })()}
@@ -241,7 +219,7 @@ export function BillingSuccessTemplate({
                   marginBottom: 'var(--gap-md)',
                 }}
               >
-                {t('billing:templates.success.whatsNext', "What's Next?")}
+                {t('billing:templates.success.whatsNext')}
               </h2>
               <Stack as="ul">
                 {nextSteps.map((step) => (
@@ -296,10 +274,7 @@ export function BillingSuccessTemplate({
                           icon={ExternalLink}
                         >
                           {step.linkText ||
-                            t(
-                              'billing:templates.success.learnMore',
-                              'Learn more'
-                            )}
+                            t('billing:templates.success.learnMore')}
                         </Button>
                       )}
                     </div>
@@ -322,10 +297,7 @@ export function BillingSuccessTemplate({
                 color: 'var(--muted-foreground)',
               }}
             >
-              {t(
-                'billing:templates.success.needHelp',
-                'Need help? Contact us at'
-              )}{' '}
+              {t('billing:templates.success.needHelp')}{' '}
               <a
                 href={`mailto:${supportEmail}`}
                 style={{
@@ -351,7 +323,7 @@ export function BillingSuccessTemplate({
               </Link>
             )}
           >
-            {t('billing:templates.success.goToDashboard', 'Go to Dashboard')}
+            {t('billing:templates.success.goToDashboard')}
           </Button>
         </div>
       </div>

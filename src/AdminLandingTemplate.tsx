@@ -153,11 +153,10 @@ export function AdminLandingTemplate({
   const publicWebsitePath =
     publicWebsiteLink?.path || getPlatformEnvVar('APP_URL');
 
-  const supportLabel =
-    supportLink?.label || t('adminLanding.contactSupport', 'Contact Support');
+  const supportLabel = supportLink?.label || t('adminLanding.contactSupport');
 
   const publicWebsiteLabel =
-    publicWebsiteLink?.label || t('adminLanding.visitWebsite', 'Visit Website');
+    publicWebsiteLink?.label || t('adminLanding.visitWebsite');
 
   return (
     <PageContainer>
@@ -181,10 +180,9 @@ export function AdminLandingTemplate({
         <Section contentWidth="narrow">
           <Stack align="center">
             <Text as="p" level="body" variant="muted">
-              {t(
-                'adminLanding.signedInAs',
-                `Signed in as ${user.email || user.displayName || user.id}`
-              )}
+              {t('adminLanding.signedInAs', {
+                user: user.email || user.displayName || user.id,
+              })}
             </Text>
           </Stack>
         </Section>

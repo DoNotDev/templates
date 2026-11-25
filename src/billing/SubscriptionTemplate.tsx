@@ -118,10 +118,7 @@ export function SubscriptionTemplate({
         <FeatureDisabled
           featureName="Subscriptions"
           title={title || t('billing:templates.subscription.title')}
-          description={t(
-            'billing:templates.subscription.notAvailable',
-            'Stripe billing is not configured or available. Please contact support if you believe this is an error.'
-          )}
+          description={t('billing:templates.subscription.notAvailable')}
           showContactSupport={true}
           showRetry={true}
           onRetry={() => {
@@ -137,10 +134,7 @@ export function SubscriptionTemplate({
       <PageContainer variant="standard">
         <Stack align="center" gap="medium">
           <Text variant="muted" textAlign="center">
-            {t(
-              'billing:templates.subscription.loading',
-              'Loading subscriptions...'
-            )}
+            {t('billing:templates.subscription.loading')}
           </Text>
         </Stack>
       </PageContainer>
@@ -193,8 +187,7 @@ export function SubscriptionTemplate({
               setBillingInterval(checked ? 'year' : 'month')
             }
             aria-label={t(
-              'billing:templates.subscription.billingToggle.ariaLabel',
-              'Toggle billing interval'
+              'billing:templates.subscription.billingToggle.ariaLabel'
             )}
           />
           <Text
@@ -220,10 +213,7 @@ export function SubscriptionTemplate({
         {filteredPlans.length === 0 ? (
           <Stack align="center" gap="medium">
             <Text variant="muted" textAlign="center">
-              {t(
-                'billing:templates.subscription.noPlans',
-                'No plans available for this billing period.'
-              )}
+              {t('billing:templates.subscription.noPlans')}
             </Text>
           </Stack>
         ) : (
@@ -268,14 +258,11 @@ export function SubscriptionTemplate({
       {/* Footer CTA */}
       <CallToAction
         tone="ghost"
-        title={t('billing:templates.subscription.cta.title', 'Have questions?')}
-        subtitle={t(
-          'billing:templates.subscription.cta.subtitle',
-          'Our team is here to help you choose the right plan.'
-        )}
+        title={t('billing:templates.subscription.cta.title')}
+        subtitle={t('billing:templates.subscription.cta.subtitle')}
         primaryAction={
           <Button variant={BUTTON_VARIANT.OUTLINE}>
-            {t('billing:templates.subscription.cta.action', 'Contact Us')}
+            {t('billing:templates.subscription.cta.action')}
           </Button>
         }
       />

@@ -317,7 +317,6 @@ export function ProductCardListTemplate({
         <Section
           title={t('crud:filters.title', {
             entity: entityName,
-            defaultValue: `Browse ${entityName} - Filters`,
           })}
           collapsible
           defaultOpen={true}
@@ -330,10 +329,8 @@ export function ProductCardListTemplate({
               onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
             >
               {showFavoritesOnly
-                ? t('crud:favorites.showAll', { defaultValue: 'Show All' })
-                : t('crud:favorites.showFavorites', {
-                    defaultValue: 'Show Favorites',
-                  })}
+                ? t('crud:favorites.showAll')
+                : t('crud:favorites.showFavorites')}
             </Button>
 
             <EntityFilters
@@ -371,9 +368,7 @@ export function ProductCardListTemplate({
             style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--destructive)' }}>
-              {t('crud:errors.fetchFailed', {
-                defaultValue: `Failed to load ${entity.name.toLowerCase()}`,
-              })}
+              {t('crud:errors.fetchFailed', { entity: entityName })}
             </Text>
             <Text level="small" style={{ color: 'var(--destructive)' }}>
               {fetchError instanceof Error
@@ -388,14 +383,10 @@ export function ProductCardListTemplate({
             style={{ padding: 'var(--gap-lg)', textAlign: 'center' }}
           >
             <Text level="h3" style={{ color: 'var(--muted-foreground)' }}>
-              {t('crud:emptyState.title', {
-                defaultValue: `No ${entity.name.toLowerCase()} found`,
-              })}
+              {t('crud:emptyState.title', { entity: entityName })}
             </Text>
             <Text style={{ color: 'var(--muted-foreground)' }}>
-              {t('crud:emptyState.description', {
-                defaultValue: `No ${entity.name.toLowerCase()} available at this time.`,
-              })}
+              {t('crud:emptyState.description', { entity: entityName })}
             </Text>
           </Stack>
         ) : (
@@ -621,12 +612,8 @@ export function ProductCardListTemplate({
                     }}
                     aria-label={
                       itemIsFavorite
-                        ? t('crud:favorites.remove', {
-                            defaultValue: 'Remove from favorites',
-                          })
-                        : t('crud:favorites.add', {
-                            defaultValue: 'Add to favorites',
-                          })
+                        ? t('crud:favorites.remove')
+                        : t('crud:favorites.add')
                     }
                   >
                     <Heart
@@ -649,15 +636,9 @@ export function ProductCardListTemplate({
           <Section
             title={
               loading
-                ? t('crud:results.title.fetching', {
-                    defaultValue: 'Fetching...',
-                  })
+                ? t('crud:results.title.fetching')
                 : t('crud:results.title.count', {
                     count: data.length,
-                    defaultValue:
-                      data.length === 1
-                        ? 'Found 1 item'
-                        : `Found ${data.length} items`,
                   })
             }
             collapsible
