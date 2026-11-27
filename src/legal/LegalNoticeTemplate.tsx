@@ -58,6 +58,13 @@ export interface LegalNoticeConfig {
   };
   /** Section tone for background @default 'base' */
   tone?: 'ghost' | 'base' | 'muted' | 'contrast' | 'accent';
+  /**
+   * App path of the privacy policy page, linked from the personal data and cookies
+   * sections. Set it when the app's privacy page is not at `/privacy`
+   * (e.g. `/legal/privacy`), as the footer's `legalLinks` are set.
+   * @default '/privacy'
+   */
+  privacyPath?: string;
 }
 
 /** Section block: h2 heading plus its content, tight vertical rhythm. */
@@ -119,6 +126,7 @@ export const LegalNoticeTemplate: ComponentType<LegalNoticeConfig> = ({
     cookies: true,
   },
   tone = 'base',
+  privacyPath = '/privacy',
 }) => {
   const { t, i18n } = useTranslation('legalNotice');
   const formattedDate = formatDate(lastUpdated, i18n?.language || 'en');
@@ -212,7 +220,7 @@ export const LegalNoticeTemplate: ComponentType<LegalNoticeConfig> = ({
           <Block title={t('personalData.title')}>
             <Text as="p">
               {t('personalData.content')}
-              <Link path="/privacy">{t('personalData.privacyPolicy')}</Link>.
+              <Link path={privacyPath}>{t('personalData.privacyPolicy')}</Link>.
             </Text>
           </Block>
         )}
@@ -222,7 +230,7 @@ export const LegalNoticeTemplate: ComponentType<LegalNoticeConfig> = ({
           <Block title={t('cookies.title')}>
             <Text as="p">
               {t('cookies.content')}
-              <Link path="/privacy">{t('cookies.privacyPolicy')}</Link>.
+              <Link path={privacyPath}>{t('cookies.privacyPolicy')}</Link>.
             </Text>
           </Block>
         )}
